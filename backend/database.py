@@ -20,6 +20,7 @@ import secrets
 import hashlib
 import json
 import uuid
+import logging
 import threading
 from contextlib import contextmanager
 from datetime import datetime, date, timedelta
@@ -57,8 +58,10 @@ def _database_init_lock():
 SCHEMA_OTP = """
 CREATE TABLE IF NOT EXISTS otp_codes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL REFERENCES users(id),
-    role TEXT NOT NULL,
+    -- NULL for signup OTPs: the account does not exist until the code is
+    -- verified, so no user id can be bound at issue time.
+    user_id INTEGER REFERENCES users(id),
+    role TEXT,
     mobile_e164 TEXT NOT NULL,
     otp_hash TEXT NOT NULL,
     otp_salt TEXT NOT NULL,
@@ -672,6 +675,54 @@ def verify_password(password: str, salt: str, pw_hash: str) -> bool:
     return secrets.compare_digest(test_hash, pw_hash)
 
 
+# --------------------------------------------------------------------------
+# Mobile-OTP-only accounts
+# --------------------------------------------------------------------------
+# ``users.password_hash`` / ``users.salt`` are NOT NULL and are intentionally
+# KEPT: dropping them would rewrite every existing row and break any rollback to
+# an older revision. Password *authentication* is gone (see app.py), so accounts
+# created under OTP-only signup get an unusable credential instead — a hash of a
+# 256-bit random secret that is discarded, so no password can ever match it.
+def otp_only_credentials():
+    """Return a (password_hash, salt) pair that can never authenticate."""
+    return hash_password(secrets.token_urlsafe(32))
+
+
+def normalize_user_mobile(value) -> str | None:
+    """Canonical E.164 form of a mobile number (``+91XXXXXXXXXX`` for India)."""
+    from ivr_config import normalize_indian_number
+    return normalize_indian_number(value)
+
+
+def find_user_by_mobile(conn, mobile_raw, roles=None):
+    """Look up one account by mobile number, tolerating legacy storage formats.
+
+    Matches the normalized ``mobile_e164`` column first and falls back to the
+    free-text ``mobile`` column so accounts created before normalization (seeded
+    staff, and accounts migrated from email/password signup) still resolve.
+
+    ``roles`` optionally restricts the lookup to a subset of roles.
+    Returns a ``sqlite3.Row`` or ``None``.
+    """
+    e164 = normalize_user_mobile(mobile_raw)
+    local = e164[-10:] if e164 else None
+    raw = str(mobile_raw or "").strip()
+    if not e164 and not raw:
+        return None
+
+    sql = "SELECT * FROM users WHERE (mobile_e164=? OR mobile=?)"
+    params: list = [e164, raw]
+    if local:
+        sql = "SELECT * FROM users WHERE (mobile_e164=? OR mobile_e164=? OR mobile=? OR mobile=?)"
+        params = [e164, local, raw, local]
+    role_list = [r for r in (roles or ()) if r]
+    if role_list:
+        sql += f" AND role IN ({','.join('?' * len(role_list))})"
+        params.extend(role_list)
+    sql += " ORDER BY id LIMIT 1"
+    return conn.execute(sql, params).fetchone()
+
+
 def next_code(conn, prefix, table, code_col, pad=6, district="PUN"):
     """Generate a sequential human readable code like CASE-000812 or MH-PUN-000123."""
     cur = conn.execute(f"SELECT COUNT(*) c FROM {table}")
@@ -740,6 +791,9 @@ def init_db(reset=False):
             ensure_govt_and_stock(conn)
             ensure_campaigns(conn)
             ensure_lab_user(conn)
+            # Runs after the seeds so newly provisioned staff accounts are
+            # normalized and indexed in the same boot.
+            ensure_mobile_e164_backfill(conn)
             ensure_qr_for_existing_animals(conn)
             ensure_extended_seeds(conn)
             ensure_helpline_defaults(conn)
@@ -753,6 +807,71 @@ def ensure_user_columns(conn):
     columns = {row["name"] for row in conn.execute("PRAGMA table_info(users)").fetchall()}
     if "preferred_language" not in columns:
         conn.execute("ALTER TABLE users ADD COLUMN preferred_language TEXT")
+    if "mobile_e164" not in columns:
+        # Canonical E.164 form of ``mobile``. Mobile OTP login is the only
+        # authentication path, so every lookup/uniqueness check keys on this
+        # normalized value instead of the free-text ``mobile`` column.
+        conn.execute("ALTER TABLE users ADD COLUMN mobile_e164 TEXT")
+    conn.commit()
+
+
+def ensure_mobile_e164_backfill(conn):
+    """Backfill ``users.mobile_e164`` and index it (idempotent, non-destructive).
+
+    Existing accounts keep their ``mobile`` value untouched; the normalized
+    column is derived from it so accounts provisioned before OTP-only login
+    (seeded vets/govt/lab, and any account created through the old email +
+    password signup) can be found — and cannot be duplicated — by mobile number.
+
+    A UNIQUE index is created when the data allows it. If two legacy rows
+    normalize to the same number the index would fail, so a plain index is used
+    instead and the conflict is reported for an operator to resolve; the
+    application still refuses to create a duplicate account.
+    """
+    from ivr_config import normalize_indian_number
+
+    rows = conn.execute(
+        "SELECT id, mobile, mobile_e164 FROM users WHERE mobile_e164 IS NULL OR mobile_e164=''"
+    ).fetchall()
+    unresolved = 0
+    for row in rows:
+        e164 = normalize_indian_number(row["mobile"])
+        if not e164:
+            # A non-Indian or malformed legacy number: leave it NULL. NULLs are
+            # distinct in a SQLite unique index, so nothing breaks.
+            unresolved += 1
+            continue
+        conn.execute("UPDATE users SET mobile_e164=? WHERE id=?", (e164, row["id"]))
+    if unresolved:
+        logging.getLogger(__name__).warning(
+            "mobile_e164_backfill skipped=%s rows with a non-Indian or malformed mobile number",
+            unresolved,
+        )
+
+    existing_indexes = {
+        row["name"] for row in
+        conn.execute("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='users'").fetchall()
+    }
+    if "idx_users_mobile_e164_unique" in existing_indexes or "idx_users_mobile_e164" in existing_indexes:
+        conn.commit()
+        return
+
+    duplicates = conn.execute(
+        "SELECT mobile_e164, COUNT(*) c FROM users WHERE mobile_e164 IS NOT NULL "
+        "GROUP BY mobile_e164 HAVING c > 1"
+    ).fetchall()
+    if duplicates:
+        logging.getLogger(__name__).error(
+            "mobile_e164_duplicates=%s — unique index not created; an operator must "
+            "resolve the duplicate accounts (application-level uniqueness still applies)",
+            len(duplicates),
+        )
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_users_mobile_e164 ON users(mobile_e164)")
+    else:
+        conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_mobile_e164_unique "
+            "ON users(mobile_e164) WHERE mobile_e164 IS NOT NULL"
+        )
     conn.commit()
 
 
@@ -996,6 +1115,70 @@ def ensure_otp_tables(conn):
     """
     conn.executescript(SCHEMA_OTP)
     _ensure_otp_diagnostic_columns(conn)
+    _ensure_otp_signup_columns_nullable(conn)
+    conn.commit()
+
+
+def _ensure_otp_signup_columns_nullable(conn):
+    """Relax ``otp_codes.user_id``/``role`` so pre-account (signup) OTPs fit.
+
+    Mobile-OTP signup issues a code *before* the account exists, so those two
+    columns must accept NULL. SQLite cannot drop a NOT NULL constraint, so the
+    table is rebuilt exactly once (the same pattern as :func:`migrate_users_role`).
+    Every column shared by the old and new table is copied verbatim — hashes,
+    salts, statuses and diagnostics survive, so no OTP data is lost.
+    """
+    try:
+        info = conn.execute("PRAGMA table_info(otp_codes)").fetchall()
+    except sqlite3.Error:
+        return
+    if not info:
+        return
+    constraints = {row["name"]: int(row["notnull"] or 0) for row in info}
+    if not constraints.get("user_id") and not constraints.get("role"):
+        return  # already migrated
+
+    base_columns = [
+        "id", "user_id", "role", "mobile_e164", "otp_hash", "otp_salt", "purpose",
+        "attempts", "max_attempts", "status", "created_at", "expires_at",
+        "consumed_at", "request_ip",
+    ]
+    old_columns = [row["name"] for row in info]
+    # Carry across every column the old table already has (base + diagnostics
+    # added by an earlier revision) so the rebuild is lossless.
+    extra_columns = [c for c in old_columns if c not in base_columns]
+    extra_ddl = "".join(
+        f",\n            {name} {OTP_CODE_DIAGNOSTIC_COLUMNS.get(name, 'TEXT')}"
+        for name in extra_columns
+    )
+    shared = [c for c in old_columns if c in base_columns or c in OTP_CODE_DIAGNOSTIC_COLUMNS]
+    column_list = ", ".join(shared)
+    conn.executescript(f"""
+        PRAGMA foreign_keys=OFF;
+        CREATE TABLE otp_codes_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER REFERENCES users(id),
+            role TEXT,
+            mobile_e164 TEXT NOT NULL,
+            otp_hash TEXT NOT NULL,
+            otp_salt TEXT NOT NULL,
+            purpose TEXT NOT NULL DEFAULT 'farmer_login',
+            attempts INTEGER NOT NULL DEFAULT 0,
+            max_attempts INTEGER NOT NULL DEFAULT 5,
+            status TEXT NOT NULL DEFAULT 'ACTIVE'
+                CHECK(status IN ('ACTIVE','USED','INVALIDATED','EXPIRED','LOCKED','SEND_FAILED')),
+            created_at TEXT NOT NULL,
+            expires_at TEXT NOT NULL,
+            consumed_at TEXT,
+            request_ip TEXT{extra_ddl}
+        );
+        INSERT INTO otp_codes_new ({column_list}) SELECT {column_list} FROM otp_codes;
+        DROP TABLE otp_codes;
+        ALTER TABLE otp_codes_new RENAME TO otp_codes;
+        PRAGMA foreign_keys=ON;
+    """)
+    # DROP TABLE removed the indexes with it; SCHEMA_OTP recreates them.
+    conn.executescript(SCHEMA_OTP)
     conn.commit()
 
 

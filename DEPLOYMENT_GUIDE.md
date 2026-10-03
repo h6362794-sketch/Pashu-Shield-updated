@@ -266,18 +266,29 @@ Status must report `online: true`; its HTTP 200 alone is not sufficient. The Fla
 
 For an already-created/manual Render service, explicitly update its root/build/start/health settings to the ML table above; editing `render.yaml` alone may not update that service. Redeploy the repaired code to the existing ML service (do not create a duplicate), set the backend's actual `SIH_ML_BACKEND`, redeploy the backend, and run these checks. A root 200 only proves the route exists, not model readiness, real inference, or deployed backend connectivity.
 
-Test authentication through Vercel:
+Test authentication through Vercel (mobile OTP — there is no password login):
 
 ```bash
-curl -f -X POST "$FRONTEND/api/auth/login" \
-  -H 'Content-Type: application/json' \
-  -d '{"identifier":"rajesh@example.com","password":"password123"}'
+# 1. Ask for an OTP for a registered mobile number. The 200 means the request was
+#    accepted by the SMS gateway; delivery_confirmed is always false.
+curl -f -X POST "$FRONTEND/api/auth/otp/request" \
+  -H 'Content-Type: application/json' -d '{"mobile":"9800000001"}'
+
+# 2. Verify the code that arrived on the handset to obtain the session token.
+curl -f -X POST "$FRONTEND/api/auth/otp/verify" \
+  -H 'Content-Type: application/json' -d '{"mobile":"9800000001","otp":"<6-digit code>"}'
+
+# The retired password routes must answer 410, not 200.
+curl -s -o /dev/null -w '%{http_code}\n' -X POST "$FRONTEND/api/auth/login" \
+  -H 'Content-Type: application/json' -d '{"identifier":"x","password":"y"}'
 ```
 
 Then verify in a browser:
 
-- owner, veterinarian, government, and laboratory login;
-- registration and demo account details;
+- owner, veterinarian, government, and laboratory mobile-OTP login, each landing
+  on the dashboard for the **verified account's** role;
+- farmer self-registration (name + district after OTP verification) and the
+  "provisioned by an administrator" notice on the vet/govt/lab signup screens;
 - animal, case, prescription, vaccination, laboratory, and notification flows;
 - GIS, weather, analytics, ML prediction, and outbreak detection;
 - manual and offline Whisper reporting; and

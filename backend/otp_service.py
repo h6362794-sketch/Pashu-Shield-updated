@@ -33,13 +33,27 @@ import threading
 from datetime import datetime, timedelta, timezone
 
 import sms_gateway
-from database import DB_PATH, get_db
-from ivr_config import normalize_indian_number
+from database import DB_PATH, find_user_by_mobile, get_db
+from ivr_config import DEFAULT_CALLING_CODE, normalize_indian_number, normalize_mobile_number
 
 logger = logging.getLogger(__name__)
 
 PURPOSE_FARMER_LOGIN = "farmer_login"
+PURPOSE_STAFF_LOGIN = "staff_login"
+# Unified login-or-signup purpose used by the role-aware /api/auth/otp/* routes:
+# an OTP is issued to any valid number, so the same screen can log an existing
+# account in *or* start a permitted self-registration.
+PURPOSE_MOBILE_AUTH = "mobile_auth"
+
 FARMER_ROLE = "owner"
+OWNER_ROLE = "owner"
+STAFF_ROLES = ("vet", "govt", "lab")
+ALL_ROLES = (OWNER_ROLE,) + STAFF_ROLES
+# Roles a user may create for themselves after an OTP check. Veterinarian,
+# government and laboratory accounts stay on the existing trusted provisioning
+# path (operator-seeded / administrator approved) — see SELF_REGISTER_ROLES in
+# app.py, which is the single source of truth for the API layer.
+SELF_SERVICE_ROLES = (OWNER_ROLE,)
 
 OTP_LENGTH = 6
 DEFAULT_TTL_SECONDS = 300          # five minutes
@@ -217,14 +231,27 @@ def _constant_time_match(otp: str, salt: str, expected_hash: str) -> bool:
         return False
 
 
-def normalize_mobile(value) -> str | None:
-    """Normalize an Indian mobile number to E.164 (``+91XXXXXXXXXX``)."""
-    return normalize_indian_number(value)
+def normalize_mobile(value, calling_code: str | None = None) -> str | None:
+    """Normalize a mobile number to E.164.
+
+    Defaults to India (``+91XXXXXXXXXX``); pass an explicit calling code from
+    :data:`ivr_config.SUPPORTED_CALLING_CODES` for another country.
+    """
+    if calling_code:
+        return normalize_mobile_number(value, calling_code)
+    # No explicit code: the historical Indian normalization, unchanged.
+    return normalize_indian_number(value) or normalize_mobile_number(
+        value, DEFAULT_CALLING_CODE)
 
 
-def mobile_variants(e164: str) -> tuple[str, str]:
-    """Return (E.164, 10-digit local) so either stored format can match."""
-    return e164, e164[-10:]
+def lookup_account(conn, e164: str, roles=None):
+    """One account for a normalized number (legacy ``mobile`` values included).
+
+    Delegates to :func:`database.find_user_by_mobile`, which matches the
+    normalized ``mobile_e164`` column and falls back to the free-text ``mobile``
+    column so accounts created before normalization still resolve.
+    """
+    return find_user_by_mobile(conn, e164, roles)
 
 
 # --------------------------------------------------------------------------
@@ -357,25 +384,33 @@ def _last_sent_at(conn, mobile: str, purpose: str) -> datetime | None:
 # Public API: request / resend
 # --------------------------------------------------------------------------
 def request_otp(mobile_raw, *, ip: str | None = None,
-                purpose: str = PURPOSE_FARMER_LOGIN) -> dict:
-    """Issue (and send) a new login OTP for an existing farmer account.
+                purpose: str = PURPOSE_FARMER_LOGIN,
+                roles: tuple[str, ...] = (OWNER_ROLE,),
+                allow_unregistered: bool = False,
+                calling_code: str | None = None) -> dict:
+    """Issue (and send) a new login OTP.
+
+    ``roles`` restricts which accounts may receive a code; ``allow_unregistered``
+    additionally issues a code to a number with no account yet (the signup path).
 
     Returns a dict with ``status`` and timing metadata. It never raises for an
-    unknown or non-farmer number — the caller must return an identical, generic
+    unknown or out-of-scope number — the caller must return an identical, generic
     response to avoid account enumeration.
 
     Raises :class:`OtpError` for invalid input, rate limits, cooldown, and for
     real SMS delivery failures (a failure is never reported as success).
     """
-    e164 = normalize_mobile(mobile_raw)
+    e164 = normalize_mobile(mobile_raw, calling_code)
     if not e164:
-        raise OtpError("INVALID_MOBILE", "Enter a valid 10-digit Indian mobile number.", status=400)
+        raise OtpError("INVALID_MOBILE",
+                       "Enter a valid mobile number for the selected country code.",
+                       status=400)
 
     readiness = otp_login_status()
     if not readiness["ready"]:
         raise OtpError(
             readiness["blockers"][0],
-            "OTP login is not available right now. Please use password login.",
+            "OTP login is not available right now. Please try again later.",
             status=503,
             reason=readiness["blockers"][0],
         )
@@ -427,21 +462,17 @@ def request_otp(mobile_raw, *, ip: str | None = None,
                     status=429, retry_after=remaining,
                 )
 
-        # --- account lookup (farmers only, never another role) ---------------
-        e164_form, local_form = mobile_variants(e164)
-        user = conn.execute(
-            "SELECT * FROM users WHERE role=? AND (mobile=? OR mobile=?) LIMIT 1",
-            (FARMER_ROLE, e164_form, local_form),
-        ).fetchone()
+        # --- account lookup (scoped to the roles allowed for this purpose) ---
+        user = lookup_account(conn, e164, roles)
 
-        if not user:
+        if not user and not allow_unregistered:
             # Anti-enumeration: identical success shape, no SMS is sent.
             _log_attempt(conn, mobile=e164, ip=ip, outcome="UNKNOWN_ACCOUNT", purpose=purpose)
             purge_stale(conn)
             return {
                 "status": "ACCEPTED",
-                # No SMS is dispatched for an unknown (or non-farmer) number and
-                # the caller must not describe this as a delivery.
+                # No SMS is dispatched for an unknown (or out-of-scope) number
+                # and the caller must not describe this as a delivery.
                 "sent": False,
                 "accepted": False,
                 "delivery_confirmed": False,
@@ -460,16 +491,20 @@ def request_otp(mobile_raw, *, ip: str | None = None,
 
         conn.execute("BEGIN IMMEDIATE")
         try:
+            # Retire every older active OTP for this number + purpose. Keyed on
+            # the mobile number (not user_id) so pre-account signup codes are
+            # invalidated by a resend exactly like login codes.
             conn.execute(
-                "UPDATE otp_codes SET status=? WHERE user_id=? AND purpose=? AND status=?",
-                (_STATUS_INVALIDATED, user["id"], purpose, _STATUS_ACTIVE),
+                "UPDATE otp_codes SET status=? WHERE mobile_e164=? AND purpose=? AND status=?",
+                (_STATUS_INVALIDATED, e164, purpose, _STATUS_ACTIVE),
             )
             cursor = conn.execute(
                 "INSERT INTO otp_codes (user_id, role, mobile_e164, otp_hash, otp_salt, purpose, "
                 "attempts, max_attempts, status, created_at, expires_at, request_ip, "
                 "pepper_fingerprint) "
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (user["id"], user["role"], e164, otp_hash, salt, purpose,
+                (user["id"] if user else None, user["role"] if user else None, e164,
+                 otp_hash, salt, purpose,
                  0, otp_max_attempts(), _STATUS_ACTIVE, _iso(now), _iso(expires_at), ip,
                  fingerprint),
             )
@@ -484,7 +519,8 @@ def request_otp(mobile_raw, *, ip: str | None = None,
 
         # --- deliver ---------------------------------------------------------
         try:
-            delivery = _send_otp_sms(e164, code, user["preferred_language"], purpose)
+            delivery = _send_otp_sms(e164, code,
+                                     user["preferred_language"] if user else None, purpose)
         except sms_gateway.SmsGatewayError as exc:
             # Never claim delivery; the issued OTP is unusable and is retired.
             diag = exc.diagnostics()
@@ -502,7 +538,8 @@ def request_otp(mobile_raw, *, ip: str | None = None,
             logger.error(
                 "otp_sms_submission_failed user_id=%s error_code=%s category=%s "
                 "gateway_http_status=%s recipient=%s retryable=%s detail=%s",
-                user["id"], diag["code"], diag["category"], diag["gateway_http_status"],
+                user["id"] if user else None, diag["code"], diag["category"],
+                diag["gateway_http_status"],
                 sms_gateway.mask_phone(e164), diag["retryable"], diag["reason"],
             )
             safe_status = 503 if exc.code == "SMS_GATEWAY_NOT_CONFIGURED" else 502
@@ -530,10 +567,11 @@ def request_otp(mobile_raw, *, ip: str | None = None,
         # provider-side tracing (GET /3rdparty/v1/messages/{id}).
         logger.info(
             "otp_sms_submitted user_id=%s purpose=%s mode=%s simulated=%s accepted=%s "
-            "message_id=%s message_state=%s device_pinned=%s note=queued_not_delivered",
-            user["id"], purpose, mode, bool(delivery.get("simulated")), accepted,
-            delivery.get("message_id"), message_state,
-            bool(delivery.get("device_id_configured")),
+            "message_id=%s message_state=%s device_pinned=%s pre_account=%s "
+            "note=queued_not_delivered",
+            user["id"] if user else None, purpose, mode, bool(delivery.get("simulated")),
+            accepted, delivery.get("message_id"), message_state,
+            bool(delivery.get("device_id_configured")), user is None,
         )
         purge_stale(conn)
         return {
@@ -542,6 +580,10 @@ def request_otp(mobile_raw, *, ip: str | None = None,
             "simulated": bool(delivery.get("simulated")),
             "accepted": accepted,
             "delivery_confirmed": False,
+            # True when no account existed yet: the code authorizes a signup,
+            # not a login. Never exposed as "the number is/isn't registered"
+            # on the *request* response, which stays identical either way.
+            "pre_account": user is None,
             "gateway_mode": mode or None,
             "gateway_message_id": delivery.get("message_id"),
             "gateway_state": message_state,
@@ -557,21 +599,34 @@ def request_otp(mobile_raw, *, ip: str | None = None,
 
 
 def resend_otp(mobile_raw, *, ip: str | None = None,
-               purpose: str = PURPOSE_FARMER_LOGIN) -> dict:
+               purpose: str = PURPOSE_FARMER_LOGIN,
+               roles: tuple[str, ...] = (OWNER_ROLE,),
+               allow_unregistered: bool = False,
+               calling_code: str | None = None) -> dict:
     """Resend an OTP — identical to :func:`request_otp` but intended for the
     explicit "resend" action; the shared 60-second cooldown still applies."""
-    return request_otp(mobile_raw, ip=ip, purpose=purpose)
+    return request_otp(mobile_raw, ip=ip, purpose=purpose, roles=roles,
+                       allow_unregistered=allow_unregistered, calling_code=calling_code)
 
 
 # --------------------------------------------------------------------------
 # Public API: verify
 # --------------------------------------------------------------------------
 def verify_otp(mobile_raw, code, *, ip: str | None = None,
-               purpose: str = PURPOSE_FARMER_LOGIN) -> dict:
+               purpose: str = PURPOSE_FARMER_LOGIN,
+               roles: tuple[str, ...] = (OWNER_ROLE,),
+               allow_unregistered: bool = False,
+               calling_code: str | None = None) -> dict:
     """Verify an OTP and atomically consume it.
 
-    On success returns the authenticated farmer record as a dict:
+    On success returns the authenticated account as a dict:
     ``{"user": {...}, "user_id": int, "consumed_at": iso}``.
+
+    When ``allow_unregistered`` is set and the verified number has no account,
+    the OTP is still consumed and the result is
+    ``{"user": None, "registration_required": True, "mobile_e164": ...,
+    "consumed_at": iso}`` — proof of phone ownership that the caller may exchange
+    for a short-lived registration token. It never creates an account itself.
 
     The generic failure codes (:class:`OtpError`) are: ``INVALID_MOBILE``,
     ``OTP_INVALID``, ``OTP_EXPIRED``, ``OTP_LOCKED``, ``OTP_ALREADY_USED``,
@@ -584,9 +639,11 @@ def verify_otp(mobile_raw, code, *, ip: str | None = None,
     ``attempts_exhausted``, ``role_mismatch``) that is logged and audited so a
     production 401 can be attributed to an exact cause.
     """
-    e164 = normalize_mobile(mobile_raw)
+    e164 = normalize_mobile(mobile_raw, calling_code)
     if not e164:
-        raise OtpError("INVALID_MOBILE", "Enter a valid 10-digit Indian mobile number.", status=400)
+        raise OtpError("INVALID_MOBILE",
+                       "Enter a valid mobile number for the selected country code.",
+                       status=400)
 
     submitted = str(code or "").strip()
     if not submitted.isdigit() or len(submitted) != OTP_LENGTH:
@@ -719,9 +776,31 @@ def verify_otp(mobile_raw, code, *, ip: str | None = None,
             raise OtpError("OTP_ALREADY_USED", "This OTP has already been used. Please request a new one.",
                            status=401, reason="consumption_race")
 
-        user = conn.execute("SELECT * FROM users WHERE id=?", (row["user_id"],)).fetchone()
-        if not user or user["role"] != FARMER_ROLE:
-            # Defensive: an OTP must never authenticate a non-farmer account.
+        # Resolve the account by mobile number (not by the id stored on the OTP
+        # row) so an account created between issue and verify is still found, and
+        # so a signup OTP can never be replayed against a different account.
+        user = lookup_account(conn, e164, roles)
+        if not user:
+            if allow_unregistered:
+                # Phone ownership is proven; the caller decides whether the role
+                # the user asked for may self-register. No account is created
+                # here and no token is issued.
+                _log_attempt(conn, mobile=e164, ip=ip, outcome="VERIFIED_NO_ACCOUNT",
+                             purpose=purpose, detail="reason=registration_required")
+                purge_stale(conn)
+                logger.info(
+                    "otp_verified_pre_account purpose=%s recipient=%s otp_id=%s "
+                    "issued_age_seconds=%s",
+                    purpose, sms_gateway.mask_phone(e164), row["id"], row_age,
+                )
+                return {
+                    "user": None,
+                    "user_id": None,
+                    "registration_required": True,
+                    "mobile_e164": e164,
+                    "consumed_at": consumed_at,
+                }
+            # Defensive: an OTP must never authenticate an out-of-scope account.
             _log_attempt(conn, mobile=e164, ip=ip, outcome="VERIFY_ROLE_MISMATCH", purpose=purpose,
                          detail="reason=role_mismatch")
             _log_verify_failure(e164, "role_mismatch", "OTP_INVALID", row=row)
@@ -791,6 +870,8 @@ def otp_login_available() -> bool:
 
 def public_settings() -> dict:
     """Non-secret OTP settings for the login UI."""
+    from ivr_config import DEFAULT_CALLING_CODE as default_code
+    from ivr_config import supported_calling_codes
     return {
         "otp_login_enabled": otp_login_available(),
         "otp_length": OTP_LENGTH,
@@ -798,6 +879,9 @@ def public_settings() -> dict:
         "resend_cooldown_seconds": resend_cooldown_seconds(),
         "max_attempts": otp_max_attempts(),
         "pepper_stable": pepper_is_stable(),
+        # Country codes the login screen may offer (India first, as default).
+        "default_calling_code": default_code,
+        "supported_calling_codes": supported_calling_codes(),
     }
 
 
@@ -838,7 +922,8 @@ def _database_diagnostics() -> dict:
     return info
 
 
-def diagnostics(mobile_raw=None, *, recent_limit: int = 5) -> dict:
+def diagnostics(mobile_raw=None, *, recent_limit: int = 5,
+                purpose: str = PURPOSE_FARMER_LOGIN) -> dict:
     """Secret-free OTP diagnostics for one (masked) mobile number.
 
     Answers, file-free: is this number a registered farmer, does an OTP row
@@ -846,12 +931,16 @@ def diagnostics(mobile_raw=None, *, recent_limit: int = 5) -> dict:
     gateway (message id/state), and does the stored pepper fingerprint still
     match this process. No code, hash, salt, credential or full number is ever
     returned — only counts, states and a masked recipient.
+
+    ``purpose`` selects which OTP flow to trace (``farmer_login``,
+    ``staff_login`` or the unified ``mobile_auth``).
     """
     e164 = normalize_mobile(mobile_raw) if mobile_raw else None
     status = otp_login_status()
     report = {
         "generated_at": _iso(_utcnow()),
         "process_id": os.getpid(),
+        "purpose": purpose,
         "otp": {
             "ready": status["ready"],
             "blockers": status["blockers"],
@@ -867,6 +956,8 @@ def diagnostics(mobile_raw=None, *, recent_limit: int = 5) -> dict:
         "database": _database_diagnostics(),
         "mobile_masked": sms_gateway.mask_phone(e164) if e164 else None,
         "owner_registered": None,
+        "account_registered": None,
+        "account_role": None,
         "latest_otp": None,
         "recent_events": [],
         "gateway_status_endpoint": None,
@@ -877,13 +968,14 @@ def diagnostics(mobile_raw=None, *, recent_limit: int = 5) -> dict:
     conn = None
     try:
         conn = get_db()
-        report["owner_registered"] = bool(conn.execute(
-            "SELECT 1 FROM users WHERE role=? AND (mobile=? OR mobile=?) LIMIT 1",
-            (FARMER_ROLE, e164, e164[-10:]),
-        ).fetchone())
+        report["owner_registered"] = bool(
+            lookup_account(conn, e164, (FARMER_ROLE,)))
+        account = lookup_account(conn, e164, ALL_ROLES)
+        report["account_registered"] = bool(account)
+        report["account_role"] = account["role"] if account else None
         row = conn.execute(
             "SELECT * FROM otp_codes WHERE mobile_e164=? AND purpose=? ORDER BY id DESC LIMIT 1",
-            (e164, PURPOSE_FARMER_LOGIN),
+            (e164, purpose),
         ).fetchone()
         if row:
             stored_fingerprint = _row_value(row, "pepper_fingerprint")

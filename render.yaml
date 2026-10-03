@@ -70,8 +70,8 @@ services:
         value: "5"
       - key: OTP_RESEND_COOLDOWN_SECONDS
         value: "60"
-      - key: FARMER_PASSWORD_FALLBACK
-        value: "true"
+      # Mobile OTP is the only authentication method for every role; there is no
+      # password fallback to configure.
 
   # Existing trained-model API. If this service is already deployed separately,
   # create only the backend service above and point SIH_ML_BACKEND at its URL.

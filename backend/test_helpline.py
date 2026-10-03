@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 import time
 import unittest
@@ -9,10 +10,47 @@ from unittest.mock import patch
 
 from app import app, make_token
 import database
+import sms_gateway
 import weather
 from ivr_config import get_ivr_settings
 from ivr_security import sign_webhook_payload
 from ivr_service import list_vet_availability, recover_stale_sessions
+
+
+class _CapturingGateway:
+    """Stands in for the Android SMS Gateway so no real SMS is sent."""
+
+    def __init__(self):
+        self.messages = []
+
+    def __call__(self, to_e164, text, **kwargs):
+        self.messages.append({"to": to_e164, "text": text})
+        return {"delivered": True, "simulated": False, "mode": "CLOUD",
+                "message_id": f"stub-{len(self.messages)}", "state": "Pending",
+                "accepted": True, "http_status": 200}
+
+    @property
+    def last_code(self):
+        if not self.messages:
+            return None
+        match = re.search(r"\b(\d{6})\b", self.messages[-1]["text"])
+        return match.group(1) if match else None
+
+
+def otp_login(client, mobile):
+    """Drive the mobile-OTP login and return the response JSON."""
+    gateway = _CapturingGateway()
+    with patch.object(sms_gateway, "send_text_message", gateway), \
+            patch.dict(os.environ, {"SMS_GATEWAY_MODE": "CLOUD",
+                                    "SMS_GATEWAY_BASE_URL": "https://api.sms-gate.app/3rdparty/v1",
+                                    "SMS_GATEWAY_USERNAME": "test-user",
+                                    "SMS_GATEWAY_PASSWORD": "test-pass",
+                                    "OTP_RESEND_COOLDOWN_SECONDS": "0",
+                                    "OTP_MOBILE_MAX_REQUESTS": "100"}, clear=False):
+        requested = client.post("/api/auth/otp/request", json={"mobile": mobile})
+        assert requested.status_code == 200, requested.get_data(as_text=True)
+        return client.post("/api/auth/otp/verify",
+                           json={"mobile": mobile, "otp": gateway.last_code})
 
 
 class TestHelplineRestoration(unittest.TestCase):
@@ -90,31 +128,52 @@ class TestHelplineRestoration(unittest.TestCase):
 
     def test_04_demo_account_details_visible_on_auth(self):
         text = Path("../frontend/app.js").read_text(encoding="utf-8")
+        # The demo box now shows the seeded mobile number: there is no password.
         self.assertIn("Demo Account", text)
-        self.assertIn("Username:", text)
-        self.assertIn("Password:", text)
-        self.assertGreaterEqual(text.count("demoAccountBox(role)"), 3)
+        self.assertIn("demo_mobile", text)
+        # Defined once and rendered by the OTP login form.
+        self.assertIn("function demoAccountBox(role)", text)
+        self.assertIn("${demoAccountBox(role)}", text)
+        self.assertNotIn("type=\"password\"", text)
+        self.assertNotIn("password123", text)
 
     def test_05_demo_login(self):
-        response = self.client.post("/api/auth/login", json={"identifier": "rajesh@example.com", "password": "password123"})
-        self.assertEqual(response.status_code, 200)
+        response = otp_login(self.client, self.owner["mobile"])
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
         self.assertEqual(response.get_json()["user"]["role"], "owner")
 
     def test_06_existing_role_login(self):
-        response = self.client.post("/api/auth/login", json={"identifier": "vet1@example.com", "password": "password123"})
-        self.assertEqual(response.status_code, 200)
+        response = otp_login(self.client, self.vet["mobile"])
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
         self.assertEqual(response.get_json()["user"]["role"], "vet")
 
     def test_07_registration_with_language(self):
-        suffix = uuid.uuid4().hex[:8]
-        response = self.client.post("/api/auth/register", json={
-            "full_name": "Helpline Registration Test", "mobile": f"91{suffix[:8]}",
-            "email": f"helpline-{suffix}@example.com", "password": "secret12",
-            "confirm_password": "secret12", "role": "owner", "district": "Pune",
-            "preferred_language": "te",
-        })
+        mobile = f"9{uuid.uuid4().int % 1000000000:09d}"
+        gateway = _CapturingGateway()
+        with patch.object(sms_gateway, "send_text_message", gateway), \
+                patch.dict(os.environ, {"SMS_GATEWAY_MODE": "CLOUD",
+                                        "SMS_GATEWAY_BASE_URL": "https://api.sms-gate.app/3rdparty/v1",
+                                        "SMS_GATEWAY_USERNAME": "test-user",
+                                        "SMS_GATEWAY_PASSWORD": "test-pass",
+                                        "OTP_RESEND_COOLDOWN_SECONDS": "0",
+                                        "OTP_MOBILE_MAX_REQUESTS": "100"}, clear=False):
+            self.assertEqual(
+                self.client.post("/api/auth/otp/request", json={"mobile": mobile}).status_code,
+                200)
+            verified = self.client.post("/api/auth/otp/verify",
+                                        json={"mobile": mobile, "otp": gateway.last_code})
+            self.assertEqual(verified.status_code, 200, verified.get_data(as_text=True))
+            body = verified.get_json()
+            self.assertTrue(body["registration_required"])
+            response = self.client.post("/api/auth/otp/register", json={
+                "registration_token": body["registration_token"],
+                "role": "owner", "full_name": "Helpline Registration Test",
+                "district": "Pune", "preferred_language": "te",
+            })
         self.assertEqual(response.status_code, 201, response.get_data(as_text=True))
-        self.assertEqual(response.get_json()["user"]["preferred_language"], "te")
+        user = response.get_json()["user"]
+        self.assertEqual(user["preferred_language"], "te")
+        self.assertEqual(user["mobile_e164"], f"+91{mobile}")
 
     def test_08_farmer_identification(self):
         data = self.inbound()
@@ -309,7 +368,12 @@ class TestHelplineRestoration(unittest.TestCase):
 
     def test_29_security_401_403_and_webhook_auth(self):
         self.assertEqual(self.client.get("/api/ivr/reports").status_code, 401)
-        lab = self.client.post("/api/auth/login", json={"identifier": "lab@example.com", "password": "password123"}).get_json()["token"]
+        # Sessions come from mobile-OTP verification; make_token issues the same
+        # JWT that /api/auth/otp/verify returns.
+        conn = database.get_db()
+        lab_user = dict(conn.execute("SELECT * FROM users WHERE email='lab@example.com'").fetchone())
+        conn.close()
+        lab = make_token(lab_user)
         self.assertEqual(self.client.get("/api/ivr/reports", headers=self.auth(lab)).status_code, 403)
         unsigned = self.client.post("/api/ivr/calls/inbound", json={"caller_number": "9800000001"})
         self.assertEqual(unsigned.status_code, 401)

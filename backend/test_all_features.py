@@ -27,10 +27,18 @@ class TestPashuHealthChain(unittest.TestCase):
 
     # 1. Auth & Roles
     def test_01_lab_auth(self):
-        resp = self.client.post("/api/auth/login", json={"identifier": self.lab["email"], "password": "password123"})
-        self.assertEqual(resp.status_code, 200)
-        data = resp.get_json()
-        self.assertEqual(data["user"]["role"], "lab")
+        # Password login is retired; a lab session comes from a mobile-OTP
+        # verification (covered end-to-end in test_mobile_otp_auth.py). Here we
+        # assert the retired route is closed and that the lab JWT the OTP flow
+        # issues is accepted by the role-gated endpoints.
+        retired = self.client.post("/api/auth/login",
+                                   json={"identifier": self.lab["email"], "password": "password123"})
+        self.assertEqual(retired.status_code, 410)
+        self.assertEqual(retired.get_json()["code"], "PASSWORD_AUTH_REMOVED")
+
+        me = self.client.get("/api/users/me", headers=self.auth_headers(self.lab_token))
+        self.assertEqual(me.status_code, 200)
+        self.assertEqual(me.get_json()["role"], "lab")
 
     # 2. Animal QR Identity
     def test_02_animal_qr_lifecycle(self):

@@ -120,6 +120,61 @@ def local_number(value: str | None) -> str | None:
     return normalized[-10:] if normalized else None
 
 
+# --------------------------------------------------------------------------
+# Mobile numbers for OTP login
+# --------------------------------------------------------------------------
+# Calling codes accepted by the login screen, each with the (min, max) length of
+# the national (significant) number. India is the default: the platform serves
+# Maharashtra, and every seeded account is an Indian mobile.
+SUPPORTED_CALLING_CODES: dict[str, tuple[int, int]] = {
+    "91": (10, 10),    # India (default)
+    "1": (10, 10),     # United States / Canada
+    "44": (9, 10),     # United Kingdom
+    "977": (10, 10),   # Nepal
+    "880": (10, 10),   # Bangladesh
+    "94": (9, 9),      # Sri Lanka
+    "971": (9, 9),     # United Arab Emirates
+}
+DEFAULT_CALLING_CODE = "91"
+
+
+def supported_calling_codes() -> list[dict]:
+    """Calling codes offered by the login UI (never secret, safe to publish)."""
+    return [{"calling_code": code, "e164_prefix": f"+{code}"} for code in SUPPORTED_CALLING_CODES]
+
+
+def normalize_mobile_number(value, calling_code: str | None = None) -> str | None:
+    """Normalize a mobile number to E.164 for the given calling code.
+
+    ``calling_code`` defaults to India (``91``), in which case the result is
+    identical to :func:`normalize_indian_number` for every Indian input — the
+    two functions agree on 10-digit, ``0``-prefixed, ``00``-prefixed and full
+    ``+91`` forms. An unsupported calling code yields ``None`` rather than a
+    guessed number, so a bad selection can never invent a recipient.
+    """
+    code = re.sub(r"\D", "", str(calling_code or "")) or DEFAULT_CALLING_CODE
+    if code not in SUPPORTED_CALLING_CODES:
+        return None
+    text = str(value or "").strip()
+    if not text:
+        return None
+    explicit = text.startswith("+") or re.sub(r"\D", "", text).startswith("00")
+    digits = re.sub(r"\D", "", text)
+    if digits.startswith("00"):
+        digits = digits[2:]
+    minimum, maximum = SUPPORTED_CALLING_CODES[code]
+
+    if explicit and digits.startswith(code):
+        national = digits[len(code):]
+    elif not explicit and len(digits) == maximum + 1 and digits.startswith("0"):
+        national = digits[1:]           # national trunk prefix: 0 + number
+    else:
+        national = digits
+    if not (minimum <= len(national) <= maximum) or not national:
+        return None
+    return f"+{code}{national}"
+
+
 @dataclass(frozen=True)
 class IvrSettings:
     phone_number: str

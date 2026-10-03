@@ -1,7 +1,9 @@
 import os
+import re
 import json
 import hmac
 import math
+import time
 import uuid
 import jwt
 import sqlite3
@@ -22,7 +24,7 @@ import qrcode
 from sklearn.cluster import DBSCAN
 
 from database import (
-    get_db, init_db, hash_password, verify_password, next_code,
+    get_db, init_db, next_code,
     audit_log, calculate_expected_delivery, DB_PATH
 )
 from case_service import create_case_record
@@ -40,8 +42,9 @@ from otp_service import (
     OtpError, otp_login_available, otp_login_status,
     diagnostics as otp_diagnostics,
     public_settings as otp_public_settings,
-    request_otp as request_farmer_otp, resend_otp as resend_farmer_otp,
-    verify_otp as verify_farmer_otp,
+    request_otp as otp_request, resend_otp as otp_resend,
+    verify_otp as otp_verify,
+    ALL_ROLES, OWNER_ROLE, PURPOSE_FARMER_LOGIN, PURPOSE_MOBILE_AUTH,
 )
 from sms_service import send_sms, send_sms_urgent, get_sent_log, get_dead_letters, get_worker_stats, get_sms_provider_info
 from push_service import is_push_configured, get_public_key, push_notification
@@ -346,9 +349,11 @@ def health():
             # Documented multi-device behaviour: unpinned ⇒ random device.
             "device_pinned": gateway["device_pinned"],
         },
+        # The only authentication method the service offers. The key keeps its
+        # historical name for deployed dashboards; it now covers every role.
         "farmer_otp_login": {
             "enabled": otp_login_available(),
-            "password_fallback_enabled": _farmer_password_fallback_allowed(),
+            "password_fallback_enabled": False,
             # Secret-free readiness flags: an unstable pepper (or a database
             # outside the persistent disk) silently breaks OTP verification.
             "pepper_stable": otp_status["pepper_stable"],
@@ -358,6 +363,11 @@ def health():
                 (os.environ.get("SIH_DB_PATH") or "").strip()
                 and (not os.environ.get("RENDER") or DB_PATH.startswith("/var/data"))
             ),
+        },
+        "authentication": {
+            "method": "mobile_otp",
+            "password_auth_enabled": False,
+            "self_register_roles": list(SELF_REGISTER_ROLES),
         },
     }), 200 if database_ok else 503
 
@@ -379,83 +389,51 @@ def ivr_info():
 
 
 # ------------------------------------------------------------------ auth --
+# Authentication is mobile number + SMS OTP for EVERY role. Email/password
+# login and signup are removed from the product, so the two legacy public routes
+# below are retired with an explicit 410 rather than deleted: an old client (or
+# a scripted attempt to bypass the OTP-only policy) gets an actionable answer
+# instead of a 404 that looks like a routing bug.
+#
+# ``users.password_hash`` / ``users.salt`` and ``users.email`` are deliberately
+# KEPT. They are no longer credentials — nothing in the request path reads them —
+# but the columns stay so existing rows are untouched, an older revision can
+# still be rolled back onto the same database, and the seeded staff accounts
+# keep their provisioning history. New accounts get an unusable credential.
+SELF_REGISTER_ROLES = ("owner",)          # farmers may create their own account
+PROVISIONED_ROLES = ("vet", "govt", "lab")  # operator-seeded / admin approved
+
+PASSWORD_AUTH_REMOVED_PAYLOAD = {
+    "error": ("Password sign-in has been removed. Please continue with your "
+              "mobile number and OTP."),
+    "code": "PASSWORD_AUTH_REMOVED",
+    "login_method": "mobile_otp",
+}
+
+
 @app.post("/api/auth/register")
+@app.get("/api/auth/register")
 def register():
-    data = request.get_json(force=True) or {}
-    required = ["full_name", "mobile", "email", "password", "confirm_password", "role"]
-    missing = [f for f in required if not data.get(f)]
-    if missing:
-        return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
-    if data["password"] != data["confirm_password"]:
-        return jsonify({"error": "Passwords do not match"}), 400
-    if len(data["password"]) < 6:
-        return jsonify({"error": "Password must be at least 6 characters"}), 400
-    if data["role"] not in ("owner", "vet", "govt", "lab"):
-        return jsonify({"error": "Invalid role"}), 400
-    preferred_language = (data.get("preferred_language") or "").strip().lower() or None
-    if preferred_language and preferred_language not in SUPPORTED_LANGUAGES:
-        return jsonify({"error": "Preferred language must be en, te, hi, or mr"}), 400
-
-    conn = get_db()
-    try:
-        existing = conn.execute(
-            "SELECT id FROM users WHERE email=? OR mobile=?", (data["email"], data["mobile"])
-        ).fetchone()
-        if existing:
-            return jsonify({"error": "An account with this email or mobile already exists"}), 409
-
-        pw_hash, salt = hash_password(data["password"])
-        cur = conn.execute(
-            "INSERT INTO users (full_name, mobile, email, password_hash, salt, role, specialization, preferred_language, village, block, district, state) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-            (data["full_name"], data["mobile"], data["email"], pw_hash, salt, data["role"],
-             data.get("specialization"), preferred_language, data.get("village"), data.get("block"),
-             data.get("district"), data.get("state", "Maharashtra")),
-        )
-        user_id = cur.lastrowid
-        audit_log(conn, "REGISTER_USER", "user", user_id, actor_id=user_id,
-                  actor_name=data["full_name"], actor_role=data["role"],
-                  details={"email": data["email"], "role": data["role"]})
-        conn.commit()
-        user = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
-        token = make_token(user)
-        return jsonify({"token": token, "user": public_user(user)}), 201
-    except sqlite3.IntegrityError:
-        return jsonify({"error": "An account with this email or mobile already exists"}), 409
-    finally:
-        conn.close()
+    """Retired: email/password signup is replaced by mobile-OTP registration."""
+    return jsonify(PASSWORD_AUTH_REMOVED_PAYLOAD), 410
 
 
 @app.post("/api/auth/login")
+@app.get("/api/auth/login")
 def login():
-    data = request.get_json(force=True) or {}
-    identifier = data.get("identifier") or data.get("email") or data.get("mobile")
-    password = data.get("password")
-    if not identifier or not password:
-        return jsonify({"error": "Email/mobile and password are required"}), 400
-
-    conn = get_db()
-    user = conn.execute(
-        "SELECT * FROM users WHERE email=? OR mobile=?", (identifier, identifier)
-    ).fetchone()
-    if not user or not verify_password(password, user["salt"], user["password_hash"]):
-        conn.close()
-        return jsonify({"error": "Invalid credentials"}), 401
-
-    token = make_token(user)
-    audit_log(conn, "LOGIN", "user", user["id"], actor_id=user["id"],
-              actor_name=user["full_name"], actor_role=user["role"],
-              details={"identifier": identifier})
-    conn.commit()
-    conn.close()
-    return jsonify({"token": token, "user": public_user(user)})
+    """Retired: email/password login is replaced by mobile-OTP login."""
+    return jsonify(PASSWORD_AUTH_REMOVED_PAYLOAD), 410
 
 
-# ------------------------------------------- farmer OTP login (mobile) ----
-# Farmers sign in with a mobile number + SMS OTP issued through the capcom6
-# Android SMS Gateway (Cloud Server). Vet / Govt / Lab keep password login.
-# See otp_service.py for the security model and sms_gateway.py for the API
-# contract. OTP values are never returned by these endpoints nor logged.
+# --------------------------------------- mobile OTP authentication ----------
+# Every role signs in with a mobile number + SMS OTP issued through the capcom6
+# Android SMS Gateway (Cloud Server). See otp_service.py for the security model
+# and sms_gateway.py for the API contract. OTP values are never returned by
+# these endpoints nor logged.
+#
+# Two endpoint families share the same service:
+#   /api/auth/farmer/*  farmer-only, kept for the deployed farmer client.
+#   /api/auth/otp/*     role-aware login + self-service registration (all roles).
 
 def _client_ip():
     """Best-effort client IP for rate limiting (Render terminates TLS)."""
@@ -469,12 +447,17 @@ def _client_ip():
         return None
 
 
-def _farmer_password_fallback_allowed() -> bool:
-    """Whether the legacy farmer password form stays reachable as a fallback."""
-    raw = os.environ.get("FARMER_PASSWORD_FALLBACK")
+def _calling_code(data: dict):
+    """Calling code from the request body (``calling_code``/``country_code``).
+
+    Returns ``None`` when absent so the service applies its India default, and
+    a stripped digit string otherwise — an unsupported code is rejected by the
+    normalizer rather than guessed at.
+    """
+    raw = data.get("calling_code") or data.get("country_code") or data.get("cc")
     if raw is None:
-        return True
-    return str(raw).strip().lower() in ("1", "true", "yes", "on")
+        return None
+    return re.sub(r"\D", "", str(raw)) or None
 
 
 def _otp_route_readiness_error():
@@ -482,21 +465,36 @@ def _otp_route_readiness_error():
     status = otp_login_status()
     code = status["blockers"][0] if status["blockers"] else "SMS_GATEWAY_NOT_CONFIGURED"
     return jsonify({
-        "error": "OTP login is not available right now. Please use password login.",
+        "error": ("OTP login is not available right now. Please try again "
+                  "shortly, or call the helpline for help."),
         "code": code,
-        "password_fallback_enabled": _farmer_password_fallback_allowed(),
+        # Kept for API compatibility with the deployed farmer client. Password
+        # authentication no longer exists, so this is always False.
+        "password_fallback_enabled": False,
     }), 503
 
 
-def _otp_neutral_message(result, *, resend: bool = False) -> str:
+def _otp_neutral_message(result, *, resend: bool = False,
+                         registered_conditional: bool = True) -> str:
     """Delivery-agnostic wording, identical for registered and unknown numbers.
 
     A 200 from this API means "request accepted" — never "the SMS arrived".
+
+    ``registered_conditional`` keeps the historical farmer wording, which is the
+    accurate one there because an unknown number gets no SMS at all. The
+    role-aware flow dispatches a code to any valid number (login *or* signup),
+    so it describes the handover to the gateway instead and never claims that a
+    handset received it.
     """
     minutes = max(1, int(round((result.get("expires_in") or 300) / 60)))
-    prefix = ("If this mobile number is registered, a new OTP has been sent"
-              if resend else "If this mobile number is registered, an OTP has been sent")
-    return f"{prefix}. It is valid for {minutes} minutes."
+    if registered_conditional or not result.get("sent"):
+        prefix = ("If this mobile number is registered, a new OTP has been sent"
+                  if resend else "If this mobile number is registered, an OTP has been sent")
+        return f"{prefix}. It is valid for {minutes} minutes."
+    prefix = ("A new OTP has been submitted to the SMS gateway"
+              if resend else "An OTP has been submitted to the SMS gateway")
+    return (f"{prefix}. If this mobile number can receive SMS it will arrive "
+            f"shortly. It is valid for {minutes} minutes.")
 
 
 def _log_otp_dispatch(action: str, mobile, result: dict) -> None:
@@ -512,7 +510,7 @@ def _log_otp_dispatch(action: str, mobile, result: dict) -> None:
     )
 
 
-def _audit_otp_event(action, *, user_id=None, mobile=None, details=None):
+def _audit_otp_event(action, *, user_id=None, mobile=None, details=None, role=None):
     """Audit OTP lifecycle events. Mobile numbers are masked, codes never logged."""
     safe_mobile = sms_gateway.mask_phone(mobile) if mobile else None
     payload = dict(details or {})
@@ -521,18 +519,76 @@ def _audit_otp_event(action, *, user_id=None, mobile=None, details=None):
     try:
         conn = get_db()
         audit_log(conn, action, "user", user_id or "-", actor_id=user_id,
-                  actor_role="owner", details=payload, ip=_client_ip())
+                  actor_role=role or "owner", details=payload, ip=_client_ip())
         conn.commit()
         conn.close()
     except Exception:  # never block login on an audit failure
         logging.getLogger(__name__).warning("Failed to write %s audit event", action)
 
 
+# --------------------------------------------- registration tokens ----------
+# Verifying an OTP for a number with no account proves phone ownership but must
+# not itself create an account (the caller still has to pick a role and supply a
+# profile). The proof is handed back as a short-lived HMAC token bound to the
+# exact verified number; /api/auth/otp/register refuses anything else, so an
+# account can never be created without a successful OTP verification.
+REGISTRATION_TOKEN_TTL_SECONDS = 900
+_REGISTRATION_TOKEN_CONTEXT = b"pashu-mobile-otp-registration-v1"
+
+
+def _issue_registration_token(e164: str) -> str:
+    expires = int(time.time()) + REGISTRATION_TOKEN_TTL_SECONDS
+    message = f"{e164}|{expires}".encode("utf-8")
+    signature = hmac.new(SECRET_KEY.encode("utf-8"),
+                         _REGISTRATION_TOKEN_CONTEXT + b":" + message,
+                         "sha256").hexdigest()
+    payload = base64.urlsafe_b64encode(message).decode("ascii").rstrip("=")
+    return f"{payload}.{signature}"
+
+
+def _verify_registration_token(token) -> str | None:
+    """Return the verified E.164 number, or None if the token is invalid/expired."""
+    raw = str(token or "").strip()
+    if not raw or "." not in raw:
+        return None
+    payload, _, signature = raw.rpartition(".")
+    try:
+        message = base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)).decode("utf-8")
+    except Exception:
+        return None
+    expected = hmac.new(SECRET_KEY.encode("utf-8"),
+                        _REGISTRATION_TOKEN_CONTEXT + b":" + message.encode("utf-8"),
+                        "sha256").hexdigest()
+    if not hmac.compare_digest(expected, signature):
+        return None
+    e164, _, expires = message.partition("|")
+    try:
+        if int(expires) < int(time.time()):
+            return None
+    except (TypeError, ValueError):
+        return None
+    return e164 if e164.startswith("+") else None
+
+
+@app.get("/api/auth/otp/config")
+def auth_otp_config():
+    """Public, non-secret settings for the mobile-OTP login/signup screen."""
+    settings = otp_public_settings()
+    settings["login_method"] = "mobile_otp"
+    settings["password_auth_enabled"] = False
+    settings["password_fallback_enabled"] = False
+    settings["self_register_roles"] = list(SELF_REGISTER_ROLES)
+    settings["provisioned_roles"] = list(PROVISIONED_ROLES)
+    return jsonify(settings)
+
+
 @app.get("/api/auth/farmer/config")
 def farmer_auth_config():
     """Public, non-secret OTP login settings used by the farmer login screen."""
     settings = otp_public_settings()
-    settings["password_fallback_enabled"] = _farmer_password_fallback_allowed()
+    # Retained for the deployed farmer client; always False now that password
+    # authentication has been removed from the product.
+    settings["password_fallback_enabled"] = False
     return jsonify(settings)
 
 
@@ -551,7 +607,8 @@ def farmer_request_otp_route():
         return _otp_route_readiness_error()
 
     try:
-        result = request_farmer_otp(mobile, ip=_client_ip())
+        result = otp_request(mobile, ip=_client_ip(), purpose=PURPOSE_FARMER_LOGIN,
+                             roles=(OWNER_ROLE,), calling_code=_calling_code(data))
     except OtpError as exc:
         logging.getLogger(__name__).warning(
             "farmer_otp_request_failed recipient=%s error_code=%s reason=%s http_status=%s",
@@ -559,13 +616,14 @@ def farmer_request_otp_route():
         )
         if exc.code not in ("COOLDOWN_ACTIVE", "RATE_LIMITED"):
             _audit_otp_event("OTP_REQUEST_FAILED", mobile=mobile,
-                             details={"code": exc.code, "reason": exc.reason})
+                             details={"code": exc.code, "reason": exc.reason,
+                                      "purpose": PURPOSE_FARMER_LOGIN})
         return jsonify(exc.to_payload()), exc.status
 
     _log_otp_dispatch("farmer_otp_request_accepted", mobile, result)
     if result.get("sent"):
         _audit_otp_event("OTP_REQUESTED", mobile=mobile,
-                         details={"purpose": "farmer_login",
+                         details={"purpose": PURPOSE_FARMER_LOGIN,
                                   "expires_in": result.get("expires_in"),
                                   "message_id": result.get("gateway_message_id"),
                                   "message_state": result.get("gateway_state"),
@@ -597,7 +655,8 @@ def farmer_resend_otp_route():
         return _otp_route_readiness_error()
 
     try:
-        result = resend_farmer_otp(mobile, ip=_client_ip())
+        result = otp_resend(mobile, ip=_client_ip(), purpose=PURPOSE_FARMER_LOGIN,
+                            roles=(OWNER_ROLE,), calling_code=_calling_code(data))
     except OtpError as exc:
         logging.getLogger(__name__).warning(
             "farmer_otp_resend_failed recipient=%s error_code=%s reason=%s http_status=%s",
@@ -605,13 +664,14 @@ def farmer_resend_otp_route():
         )
         if exc.code != "COOLDOWN_ACTIVE":
             _audit_otp_event("OTP_RESEND_FAILED", mobile=mobile,
-                             details={"code": exc.code, "reason": exc.reason})
+                             details={"code": exc.code, "reason": exc.reason,
+                                      "purpose": PURPOSE_FARMER_LOGIN})
         return jsonify(exc.to_payload()), exc.status
 
     _log_otp_dispatch("farmer_otp_resend_accepted", mobile, result)
     if result.get("sent"):
         _audit_otp_event("OTP_RESENT", mobile=mobile,
-                         details={"purpose": "farmer_login",
+                         details={"purpose": PURPOSE_FARMER_LOGIN,
                                   "message_id": result.get("gateway_message_id"),
                                   "message_state": result.get("gateway_state"),
                                   "simulated": bool(result.get("simulated"))})
@@ -627,7 +687,7 @@ def farmer_resend_otp_route():
 
 @app.post("/api/auth/farmer/verify-otp")
 def farmer_verify_otp_route():
-    """Verify the OTP and issue the same JWT the password login returns."""
+    """Verify a farmer OTP and issue the standard application JWT."""
     data = request.get_json(silent=True) or {}
     mobile = data.get("mobile") or data.get("phone")
     code = data.get("otp") or data.get("code") or data.get("otp_code")
@@ -638,7 +698,8 @@ def farmer_verify_otp_route():
         return jsonify({"error": "The OTP is required.", "code": "INVALID_OTP_FORMAT"}), 400
 
     try:
-        result = verify_farmer_otp(mobile, code, ip=_client_ip())
+        result = otp_verify(mobile, code, ip=_client_ip(), purpose=PURPOSE_FARMER_LOGIN,
+                            roles=(OWNER_ROLE,), calling_code=_calling_code(data))
     except OtpError as exc:
         # The exact cause (no_otp_row / code_mismatch / pepper_mismatch /
         # expired / status=SEND_FAILED ...) goes to the log and the audit trail,
@@ -648,19 +709,270 @@ def farmer_verify_otp_route():
             sms_gateway.mask_phone(mobile), exc.code, exc.reason, exc.status,
         )
         _audit_otp_event("OTP_VERIFY_FAILED", mobile=mobile,
-                         details={"code": exc.code, "reason": exc.reason})
+                         details={"code": exc.code, "reason": exc.reason,
+                                  "purpose": PURPOSE_FARMER_LOGIN})
         return jsonify(exc.to_payload()), exc.status
 
-    user = result["user"]
-    # Defence in depth: a farmer OTP must never authenticate another role.
-    if user.get("role") != "owner":
-        _audit_otp_event("OTP_ROLE_REJECTED", user_id=user.get("id"), mobile=mobile)
+    user = result.get("user")
+    # Defence in depth: a farmer OTP must never authenticate another role, and
+    # this endpoint never registers an account.
+    if not user or user.get("role") != OWNER_ROLE:
+        _audit_otp_event("OTP_ROLE_REJECTED", user_id=(user or {}).get("id"), mobile=mobile,
+                         details={"purpose": PURPOSE_FARMER_LOGIN})
         return jsonify({"error": "Forbidden for this role", "code": "FORBIDDEN_ROLE"}), 403
 
     token = make_token(user)
     _audit_otp_event("LOGIN", user_id=user["id"], mobile=mobile,
-                     details={"method": "otp", "purpose": "farmer_login"})
+                     details={"method": "otp", "purpose": PURPOSE_FARMER_LOGIN})
     return jsonify({"token": token, "user": public_user(user), "login_method": "otp"})
+
+
+# ------------------------- role-aware mobile OTP login + registration -------
+# These endpoints back the single login/signup screen shared by all four
+# portals. One OTP proves control of the number; the *account* then decides the
+# role. A user can never obtain a privileged role by picking one on the login
+# screen: an existing number always resolves to its own stored role, and a new
+# number may only self-register as a farmer.
+
+def _otp_request_response(action: str, mobile, result: dict, *, resend: bool = False):
+    """Shared 200 payload for an accepted OTP request (never claims delivery)."""
+    _log_otp_dispatch(action, mobile, result)
+    if result.get("sent"):
+        _audit_otp_event(
+            "OTP_RESENT" if resend else "OTP_REQUESTED", mobile=mobile,
+            details={"purpose": PURPOSE_MOBILE_AUTH,
+                     "expires_in": result.get("expires_in"),
+                     "message_id": result.get("gateway_message_id"),
+                     "message_state": result.get("gateway_state"),
+                     "http_status": result.get("gateway_http_status"),
+                     "simulated": bool(result.get("simulated"))},
+        )
+    # Identical response whether or not the number has an account (no
+    # enumeration). delivery_confirmed is always False: a 200 means the request
+    # was accepted by the gateway, never that an SMS was delivered.
+    return jsonify({
+        "ok": True,
+        "message": _otp_neutral_message(result, resend=resend,
+                                        registered_conditional=False),
+        "delivery_confirmed": False,
+        "expires_in": result.get("expires_in"),
+        "resend_after": result.get("resend_after"),
+    })
+
+
+def _otp_request_failure(action: str, mobile, exc: OtpError, *, audit_always=False):
+    logging.getLogger(__name__).warning(
+        "%s recipient=%s error_code=%s reason=%s http_status=%s",
+        action, sms_gateway.mask_phone(mobile), exc.code, exc.reason, exc.status,
+    )
+    if audit_always or exc.code not in ("COOLDOWN_ACTIVE", "RATE_LIMITED"):
+        _audit_otp_event("OTP_REQUEST_FAILED", mobile=mobile,
+                         details={"code": exc.code, "reason": exc.reason,
+                                  "purpose": PURPOSE_MOBILE_AUTH})
+    return jsonify(exc.to_payload()), exc.status
+
+
+@app.post("/api/auth/otp/request")
+def auth_request_otp_route():
+    """Send a login/signup OTP to any valid mobile number."""
+    data = request.get_json(silent=True) or {}
+    mobile = data.get("mobile") or data.get("phone") or data.get("identifier")
+    if not mobile:
+        return jsonify({"error": "Mobile number is required.", "code": "INVALID_MOBILE"}), 400
+    if not otp_login_available():
+        return _otp_route_readiness_error()
+    try:
+        result = otp_request(mobile, ip=_client_ip(), purpose=PURPOSE_MOBILE_AUTH,
+                             roles=ALL_ROLES, allow_unregistered=True,
+                             calling_code=_calling_code(data))
+    except OtpError as exc:
+        return _otp_request_failure("auth_otp_request_failed", mobile, exc)
+    return _otp_request_response("auth_otp_request_accepted", mobile, result)
+
+
+@app.post("/api/auth/otp/resend")
+def auth_resend_otp_route():
+    """Resend a login/signup OTP. Enforces the resend cooldown."""
+    data = request.get_json(silent=True) or {}
+    mobile = data.get("mobile") or data.get("phone") or data.get("identifier")
+    if not mobile:
+        return jsonify({"error": "Mobile number is required.", "code": "INVALID_MOBILE"}), 400
+    if not otp_login_available():
+        return _otp_route_readiness_error()
+    try:
+        result = otp_resend(mobile, ip=_client_ip(), purpose=PURPOSE_MOBILE_AUTH,
+                            roles=ALL_ROLES, allow_unregistered=True,
+                            calling_code=_calling_code(data))
+    except OtpError as exc:
+        return _otp_request_failure("auth_otp_resend_failed", mobile, exc)
+    return _otp_request_response("auth_otp_resend_accepted", mobile, result, resend=True)
+
+
+@app.post("/api/auth/otp/verify")
+def auth_verify_otp_route():
+    """Verify the OTP: log an existing account in, or authorize a signup."""
+    data = request.get_json(silent=True) or {}
+    mobile = data.get("mobile") or data.get("phone")
+    code = data.get("otp") or data.get("code") or data.get("otp_code")
+
+    if not mobile:
+        return jsonify({"error": "Mobile number is required.", "code": "INVALID_MOBILE"}), 400
+    if not code:
+        return jsonify({"error": "The OTP is required.", "code": "INVALID_OTP_FORMAT"}), 400
+
+    try:
+        result = otp_verify(mobile, code, ip=_client_ip(), purpose=PURPOSE_MOBILE_AUTH,
+                            roles=ALL_ROLES, allow_unregistered=True,
+                            calling_code=_calling_code(data))
+    except OtpError as exc:
+        logging.getLogger(__name__).warning(
+            "auth_otp_verify_failed recipient=%s error_code=%s reason=%s http_status=%s",
+            sms_gateway.mask_phone(mobile), exc.code, exc.reason, exc.status,
+        )
+        _audit_otp_event("OTP_VERIFY_FAILED", mobile=mobile,
+                         details={"code": exc.code, "reason": exc.reason,
+                                  "purpose": PURPOSE_MOBILE_AUTH})
+        return jsonify(exc.to_payload()), exc.status
+
+    user = result.get("user")
+    if not user:
+        # Phone ownership proven, no account yet. The role is NOT trusted from
+        # this response — the client must call /register, which re-checks that
+        # the requested role may self-register.
+        e164 = result["mobile_e164"]
+        _audit_otp_event("OTP_VERIFIED_NO_ACCOUNT", mobile=e164,
+                         details={"purpose": PURPOSE_MOBILE_AUTH})
+        return jsonify({
+            "ok": True,
+            "registration_required": True,
+            "mobile_e164": e164,
+            "registration_token": _issue_registration_token(e164),
+            "registration_token_expires_in": REGISTRATION_TOKEN_TTL_SECONDS,
+            "self_register_roles": list(SELF_REGISTER_ROLES),
+            "provisioned_roles": list(PROVISIONED_ROLES),
+        })
+
+    token = make_token(user)
+    _audit_otp_event("LOGIN", user_id=user["id"], mobile=mobile, role=user["role"],
+                     details={"method": "otp", "purpose": PURPOSE_MOBILE_AUTH,
+                              "role": user["role"]})
+    return jsonify({"token": token, "user": public_user(user), "login_method": "otp"})
+
+
+@app.post("/api/auth/otp/register")
+def auth_otp_register_route():
+    """Create an account for an OTP-verified number (self-service roles only)."""
+    data = request.get_json(silent=True) or {}
+    e164 = _verify_registration_token(data.get("registration_token"))
+    if not e164:
+        return jsonify({
+            "error": "This registration session has expired. Please verify your OTP again.",
+            "code": "REGISTRATION_TOKEN_INVALID",
+        }), 401
+
+    role = str(data.get("role") or "").strip().lower()
+    if role not in SELF_REGISTER_ROLES:
+        # Selecting a privileged role on the signup screen must never grant it.
+        _audit_otp_event("REGISTER_ROLE_REJECTED", mobile=e164,
+                         details={"requested_role": role or None,
+                                  "allowed": list(SELF_REGISTER_ROLES)})
+        return jsonify({
+            "error": ("This portal is not open for self-registration. Veterinarian, "
+                      "government and laboratory accounts are created by an "
+                      "administrator."),
+            "code": "ROLE_NOT_SELF_REGISTERABLE",
+            "self_register_roles": list(SELF_REGISTER_ROLES),
+        }), 403
+
+    full_name = str(data.get("full_name") or "").strip()
+    district = str(data.get("district") or "").strip()
+    missing = [label for label, value in (("full_name", full_name), ("district", district))
+               if not value]
+    if missing:
+        return jsonify({"error": f"Missing fields: {', '.join(missing)}",
+                        "code": "MISSING_PROFILE_FIELDS",
+                        "required_fields": ["full_name", "district"]}), 400
+    if len(full_name) < 2:
+        return jsonify({"error": "Please enter your full name.",
+                        "code": "INVALID_PROFILE"}), 400
+
+    preferred_language = (data.get("preferred_language") or "").strip().lower() or None
+    if preferred_language and preferred_language not in SUPPORTED_LANGUAGES:
+        return jsonify({"error": "Preferred language must be en, te, hi, or mr",
+                        "code": "INVALID_PROFILE"}), 400
+    email = data.get("email")
+    if email is not None and str(email).strip() == "":
+        email = None
+    # ``users.email`` is UNIQUE NOT NULL and is no longer an authentication
+    # identifier, so a verified number without an email gets a deterministic
+    # placeholder that can never collide or be used to sign in.
+    contact_email = str(email).strip() if email else f"{e164.lstrip('+')}@mobile.pashumitra.local"
+
+    from database import find_user_by_mobile, otp_only_credentials
+
+    conn = get_db()
+    try:
+        # BEGIN IMMEDIATE takes the write lock, so the uniqueness check and the
+        # INSERT are one atomic step — two concurrent signups for the same
+        # number cannot both succeed.
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            existing = find_user_by_mobile(conn, e164)
+            if existing:
+                conn.execute("ROLLBACK")
+                # The number gained an account between verify and register: log
+                # that account in instead of creating a duplicate.
+                token = make_token(existing)
+                _audit_otp_event("REGISTER_EXISTING_LOGIN", user_id=existing["id"],
+                                 mobile=e164, role=existing["role"],
+                                 details={"purpose": PURPOSE_MOBILE_AUTH})
+                return jsonify({"token": token, "user": public_user(existing),
+                                "login_method": "otp", "registered": False})
+
+            pw_hash, salt = otp_only_credentials()
+            cur = conn.execute(
+                "INSERT INTO users (full_name, mobile, mobile_e164, email, password_hash, salt, "
+                "role, preferred_language, village, block, district, state) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                (full_name, e164[-10:], e164, contact_email, pw_hash, salt, role,
+                 preferred_language, (data.get("village") or None),
+                 (data.get("block") or None), district,
+                 (data.get("state") or "Maharashtra")),
+            )
+            user_id = cur.lastrowid
+            audit_log(conn, "REGISTER_USER", "user", user_id, actor_id=user_id,
+                      actor_name=full_name, actor_role=role,
+                      details={"mobile": sms_gateway.mask_phone(e164), "role": role,
+                               "method": "mobile_otp"})
+            conn.execute("COMMIT")
+        except sqlite3.IntegrityError:
+            try:
+                conn.execute("ROLLBACK")
+            except sqlite3.Error:
+                pass
+            # A duplicate mobile/email won the race: log that account in.
+            existing = find_user_by_mobile(conn, e164)
+            if existing:
+                token = make_token(existing)
+                return jsonify({"token": token, "user": public_user(existing),
+                                "login_method": "otp", "registered": False})
+            return jsonify({"error": "An account with this mobile number already exists.",
+                            "code": "ACCOUNT_EXISTS"}), 409
+        except Exception:
+            try:
+                conn.execute("ROLLBACK")
+            except sqlite3.Error:
+                pass
+            raise
+
+        user = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+        token = make_token(user)
+        _audit_otp_event("REGISTER_USER_OTP", user_id=user_id, mobile=e164, role=role,
+                         details={"purpose": PURPOSE_MOBILE_AUTH, "method": "mobile_otp"})
+        return jsonify({"token": token, "user": public_user(user),
+                        "login_method": "otp", "registered": True}), 201
+    finally:
+        conn.close()
 
 
 @app.get("/api/users/me")

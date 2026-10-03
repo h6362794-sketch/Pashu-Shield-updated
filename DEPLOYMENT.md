@@ -25,30 +25,45 @@ The SIP/RTP PBX is deliberately separate from Render. See `voice/README.md`.
 
 See `.env.example` for optional routing, weather, CORS, and model-path values. Do not commit a populated `.env` file.
 
-## Farmer OTP login (mobile + SMS)
+## Mobile OTP login (all roles)
 
-Farmers sign in with a registered mobile number and a six-digit SMS OTP delivered
-through the Android SMS Gateway™ (capcom6) Cloud Server API. Vet, Government and
-Lab password login is unchanged, and the farmer password endpoint still exists
-(disable the fallback UI with `FARMER_PASSWORD_FALLBACK=false` once OTP delivery
-is verified in production).
+**Every** portal — Animal Owner, Veterinarian, Government, Laboratory — signs in
+with a mobile number and a six-digit SMS OTP delivered through the Android SMS
+Gateway™ (capcom6) Cloud Server API. Email/password authentication has been
+removed: `POST /api/auth/login` and `POST /api/auth/register` answer
+**`410 Gone`** (`code: PASSWORD_AUTH_REMOVED`) and no login or signup screen
+offers a password field.
 
 Full details — API contract, security controls, migration, rollback, and the
-real-delivery verification checklist — are in [`FARMER_OTP_LOGIN.md`](FARMER_OTP_LOGIN.md).
+real-delivery verification checklist — are in
+[`MOBILE_OTP_AUTH.md`](MOBILE_OTP_AUTH.md), with the original farmer-only design
+history in [`FARMER_OTP_LOGIN.md`](FARMER_OTP_LOGIN.md).
 
 Quick production checks after deploying:
 
 ```bash
 # Gateway configuration is reported without exposing credentials
-curl -s https://pashu-shield-backend-hjgr.onrender.com/api/health | jq .sms_gateway
+curl -s https://pashu-shield-backend-hjgr.onrender.com/api/health | jq '.sms_gateway, .authentication'
 
-# Farmer login settings used by the UI
-curl -s https://pashu-shield-backend-hjgr.onrender.com/api/auth/farmer/config | jq
+# Login settings used by the UI (calling codes, self-register roles, no secrets)
+curl -s https://pashu-shield-backend-hjgr.onrender.com/api/auth/otp/config | jq
 
-# Government-only real delivery test (fixed text, no OTP)
-TOKEN=$(curl -s -X POST https://pashu-shield-backend-hjgr.onrender.com/api/auth/login \
+# The retired password routes must be closed
+curl -s -o /dev/null -w '%{http_code}\n' -X POST \
+  https://pashu-shield-backend-hjgr.onrender.com/api/auth/login \
+  -H 'Content-Type: application/json' -d '{"identifier":"x","password":"y"}'   # -> 410
+
+# Real OTP round trip for an existing account (the OTP arrives by SMS; it is
+# never returned by the API)
+curl -s -X POST https://pashu-shield-backend-hjgr.onrender.com/api/auth/otp/request \
+  -H 'Content-Type: application/json' -d '{"mobile":"<registered mobile>"}' | jq
+curl -s -X POST https://pashu-shield-backend-hjgr.onrender.com/api/auth/otp/verify \
   -H 'Content-Type: application/json' \
-  -d '{"identifier":"govt@example.com","password":"<password>"}' | jq -r .token)
+  -d '{"mobile":"<registered mobile>","otp":"<code from the SMS>"}' | jq .user.role
+
+# Government-only real delivery test (fixed text, no OTP). Use a token from the
+# OTP verify call above — there is no password login to mint one with.
+TOKEN=<token from /api/auth/otp/verify for a government account>
 curl -s -X POST https://pashu-shield-backend-hjgr.onrender.com/api/admin/sms-gateway/test \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
   -d '{"mobile":"<verified test handset>"}' | jq

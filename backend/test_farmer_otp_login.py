@@ -394,22 +394,44 @@ class OtpTestCase(unittest.TestCase):
                 seen.add(code)
         self.assertGreater(len(seen), 1, "OTPs must not repeat predictably")
 
-    # ------------------------------------- 7. role login preservation
-    def test_23_vet_govt_lab_password_login_unchanged(self):
-        for email, role in ((VET_EMAIL, "vet"), (GOVT_EMAIL, "govt"), (LAB_EMAIL, "lab")):
+    # ------------------------------- 7. password authentication is retired
+    def test_23_password_login_is_disabled_for_every_role(self):
+        """No role can reach a session with email/mobile + password any more."""
+        for identifier in (VET_EMAIL, GOVT_EMAIL, LAB_EMAIL, FARMER_MOBILE):
             response = self.client.post("/api/auth/login",
-                                        json={"identifier": email, "password": DEMO_PASSWORD})
-            self.assertEqual(response.status_code, 200, email)
+                                        json={"identifier": identifier,
+                                              "password": DEMO_PASSWORD})
+            self.assertEqual(response.status_code, 410, identifier)
             body = response.get_json()
-            self.assertEqual(body["user"]["role"], role)
-            self.assertIn("token", body)
+            self.assertEqual(body["code"], "PASSWORD_AUTH_REMOVED")
+            self.assertNotIn("token", body)
+            self.assertNotIn("user", body)
 
-    def test_24_farmer_password_login_still_works_as_fallback(self):
-        response = self.client.post("/api/auth/login",
-                                    json={"identifier": FARMER_MOBILE, "password": DEMO_PASSWORD})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json()["user"]["role"], "owner")
-        self.assertEqual(response.get_json()["user"]["id"], self.farmer["id"])
+    def test_24_password_signup_is_disabled_and_no_account_is_created(self):
+        response = self.client.post("/api/auth/register", json={
+            "full_name": "Legacy Signup", "mobile": "9111111111",
+            "email": "legacy-signup@example.com", "password": "secret12",
+            "confirm_password": "secret12", "role": "owner", "district": "Pune",
+        })
+        self.assertEqual(response.status_code, 410)
+        self.assertEqual(response.get_json()["code"], "PASSWORD_AUTH_REMOVED")
+        conn = database.get_db()
+        created = conn.execute(
+            "SELECT COUNT(*) c FROM users WHERE email='legacy-signup@example.com'"
+        ).fetchone()["c"]
+        conn.close()
+        self.assertEqual(created, 0)
+
+    def test_24b_farmer_config_no_longer_advertises_a_password_fallback(self):
+        body = self.client.get("/api/auth/farmer/config").get_json()
+        self.assertIs(body["password_fallback_enabled"], False)
+        # A 503 must not point the farmer at a password form that is gone.
+        with mock.patch.object(otp_service, "otp_login_available", return_value=False), \
+                mock.patch.object(app_module, "otp_login_available", return_value=False):
+            unavailable = self.request_otp()
+        self.assertEqual(unavailable.status_code, 503)
+        self.assertNotIn("password login", unavailable.get_json()["error"].lower())
+        self.assertIs(unavailable.get_json()["password_fallback_enabled"], False)
 
     def test_25_farmer_otp_does_not_issue_other_role_tokens(self):
         """A farmer OTP session must not be able to reach vet/govt endpoints."""

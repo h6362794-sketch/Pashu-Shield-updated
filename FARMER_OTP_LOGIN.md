@@ -1,13 +1,26 @@
 # Farmer OTP login (mobile number + SMS OTP)
 
-Farmers (`role = owner`) now sign in with their **registered mobile number** and a
+> **Superseded in part.** This document records the original farmer-only OTP
+> design and is still accurate for the SMS gateway client, the OTP security
+> model, the diagnostics endpoints and the delivery-verification checklist.
+> Two statements below are now out of date:
+>
+> * Veterinarian, Government and Laboratory accounts **no longer** use a password
+>   flow — every role now signs in with mobile + OTP, and farmer self-registration
+>   is available after OTP verification.
+> * The farmer password fallback screen (`#/login/owner/password`) and
+>   `FARMER_PASSWORD_FALLBACK` have been **removed**.
+>
+> See [`MOBILE_OTP_AUTH.md`](MOBILE_OTP_AUTH.md) for the current, role-aware
+> contract.
+
+Farmers (`role = owner`) sign in with their **registered mobile number** and a
 **six-digit OTP delivered by SMS** through the installed
 [Android SMS Gateway™ (capcom6)](https://github.com/capcom6/android-sms-gateway)
 app running in **Cloud Server** mode.
 
-Veterinarian, Government and Laboratory logins continue to use the existing
-password flow, and every existing farmer account, animal, herd, case,
-prescription, lab report and notification is untouched.
+Every existing farmer account, animal, herd, case, prescription, lab report and
+notification is untouched.
 
 ---
 
