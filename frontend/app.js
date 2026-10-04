@@ -1314,12 +1314,12 @@ function barChart(items) {
   return items.map(i => `
     <div style="margin:10px 0">
       <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${i.label}</span><b>${i.value}</b></div>
-      <div style="background:#e8eaf3;border-radius:6px;height:12px;overflow:hidden">
-        <div style="width:${Math.max((i.value / max) * 100, 2)}%;height:12px;background:#3f51b5;border-radius:6px"></div>
+      <div style="background:var(--surface-muted);border-radius:6px;height:12px;overflow:hidden">
+        <div style="width:${Math.max((i.value / max) * 100, 2)}%;height:12px;background:#347a53;border-radius:6px"></div>
       </div>
     </div>`).join("");
 }
-const PIE_COLORS = ["#3f51b5", "#e53935", "#43a047", "#fb8c00", "#8e24aa", "#00acc1", "#6d4c41", "#f4511e"];
+const PIE_COLORS = ["#347a53", "#e08a1e", "#68a679", "#d65f59", "#9abf8d", "#8c6b4f", "#527d65", "#d38b4a"];
 function pieChart(items) {
   if (!items || !items.length) return emptyState("No data yet.");
   const total = items.reduce((s, i) => s + i.value, 0) || 1;
@@ -1408,10 +1408,10 @@ document.addEventListener("change", (event) => event.target?.setCustomValidity?.
 
 // ================================================================= AUTH ==
 const ROLE_META = {
-  owner: { emoji: "🧑‍🌾", label: "role.owner", color: "#1fa971" },
-  vet: { emoji: "🩺", label: "role.vet", color: "#2f6fed" },
-  govt: { emoji: "🏛️", label: "role.govt", color: "#8e24aa" },
-  lab: { emoji: "🔬", label: "role.lab", color: "#00838f" },
+  owner: { emoji: "🧑‍🌾", label: "role.owner", color: "#347a53" },
+  vet: { emoji: "🩺", label: "role.vet", color: "#276548" },
+  govt: { emoji: "🏛️", label: "role.govt", color: "#4b7655" },
+  lab: { emoji: "🔬", label: "role.lab", color: "#477f70" },
 };
 
 function renderRoleSelect() {
@@ -2729,7 +2729,7 @@ function initGisMap() {
     }).addTo(map);
   }
   if (gisState.outline) {
-    L.geoJSON(gisState.outline, { style: { color: "#3b82f6", weight: 2, fillOpacity: 0.04, fillColor: "#3b82f6" } }).addTo(map);
+    L.geoJSON(gisState.outline, { style: { color: "#347a53", weight: 2, fillOpacity: 0.04, fillColor: "#347a53" } }).addTo(map);
   }
   gisState.map = map;
   gisState.layer = L.layerGroup().addTo(map);
@@ -2741,7 +2741,7 @@ function drawGis() {
   const { map, layer, geo, locations, disease, risks, showClusters, clusters } = gisState;
   if (!map || !layer) return;
   layer.clearLayers();
-  const colorFor = r => r === "High Risk" ? "#e2483f" : r === "Moderate Risk" ? "#e08a1e" : "#1fa971";
+  const colorFor = r => r === "High Risk" ? "#e2483f" : r === "Moderate Risk" ? "#e08a1e" : "#24754f";
   const filtered = geo.filter(d => {
     if (!risks.includes(d.risk_level)) return false;
     if (disease !== "All" && !d.diseases.some(x => x.label === disease)) return false;
@@ -2766,13 +2766,13 @@ function drawGis() {
     clusters.forEach(c => {
       L.circleMarker([c.lat, c.lng], {
         radius: Math.max(14, c.cases * 8),
-        color: "#8e24aa",
-        fillColor: "#e1bee7",
+        color: "#347a53",
+        fillColor: "#d8eadb",
         fillOpacity: 0.7,
         weight: 3,
         dashArray: "4, 4"
       }).bindTooltip(`
-        <div style="font-weight:800;color:#8e24aa">📍 Spatiotemporal Cluster: ${c.cluster_id}</div>
+        <div style="font-weight:800;color:#347a53">📍 Spatiotemporal Cluster: ${c.cluster_id}</div>
         <div style="font-size:12px"><b>District:</b> ${c.district}</div>
         <div style="font-size:12px"><b>Cases:</b> ${c.cases} active</div>
         <div style="font-size:12px"><b>Diseases:</b> ${c.diseases ? c.diseases.join(", ") : "HS"}</div>
@@ -2842,7 +2842,7 @@ function nationalSurveillanceView() {
     render(`
       ${header("National Surveillance", { back: true })}
       ${data.reporting_scope_note ? `
-        <div style="background:#e3f2fd;padding:10px 14px;border-radius:12px;margin:12px 16px;font-size:13px">
+        <div style="background:var(--blue-bg);padding:10px 14px;border-radius:12px;margin:12px 16px;font-size:13px">
           📋 ${data.reporting_scope_note}
         </div>
       ` : ""}
@@ -3568,7 +3568,7 @@ function animalRecordView(role) {
         ${reproLatest && reproLatest.breeding_notes ? `<div class="small-muted" style="margin-top:6px"><b>Notes:</b> ${reproLatest.breeding_notes}</div>` : ""}
         ${canEdit ? `
           <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="document.getElementById('reproFormWrap').style.display='block'">+ Record Reproductive Event</button>
-          <div id="reproFormWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="reproFormWrap" style="display:none;margin-top:12px;background:var(--surface-soft);padding:12px;border-radius:12px">
             <form id="reproForm">
               <div class="form-row">
                 <div class="field"><label>Event</label><select name="event_type"><option>Pregnancy Check</option><option>AI</option><option>Natural Service</option><option>Calving</option><option>Abortion</option></select></div>
@@ -3601,7 +3601,7 @@ function animalRecordView(role) {
         </div>
         ${isVet ? `
           <button class="btn btn-outline btn-sm" onclick="document.getElementById('allergyFormWrap').style.display='block'">+ Add Known Allergy</button>
-          <div id="allergyFormWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="allergyFormWrap" style="display:none;margin-top:12px;background:var(--surface-soft);padding:12px;border-radius:12px">
             <form id="allergyForm">
               <div class="form-row">
                 <div class="field"><label>Allergen Name</label><input name="allergen" placeholder="e.g. Penicillin, NSAID, Sulfa" required /></div>
@@ -4085,7 +4085,7 @@ function caseDetailView(role) {
           ${isVet ? `<button class="btn btn-ghost btn-sm" onclick="document.getElementById('sampleCollectWrap').style.display='block'">+ Collect Sample</button>` : ""}
         </div>
         ${isVet ? `
-          <div id="sampleCollectWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="sampleCollectWrap" style="display:none;margin-top:12px;background:var(--surface-soft);padding:12px;border-radius:12px">
             <form id="sampleCollectForm">
               <div class="form-row">
                 <div class="field"><label>Sample Type</label><select name="sample_type"><option>Blood Sample</option><option>Nasal Swab</option><option>Tissue Biopsy</option><option>Milk Sample</option><option>Fecal Sample</option></select></div>
@@ -4130,7 +4130,7 @@ function caseDetailView(role) {
           ${isVet ? `<button class="btn btn-ghost btn-sm" onclick="document.getElementById('trFormWrap').style.display='block'">+ Record Response</button>` : ""}
         </div>
         ${isVet ? `
-          <div id="trFormWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="trFormWrap" style="display:none;margin-top:12px;background:var(--surface-soft);padding:12px;border-radius:12px">
             <form id="trForm">
               <div class="field"><label>Patient Response</label>
                 <select name="response">
@@ -4361,8 +4361,8 @@ function initTrackMap(t, role) {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(trackMap);
   L.marker([t.destination.lat, t.destination.lng]).addTo(trackMap).bindTooltip(role === "owner" ? `📍 ${ft("location")} · ${ft("animal")}` : "📍 Animal Location");
   if (t.origin) L.marker([t.origin.lat, t.origin.lng]).addTo(trackMap).bindTooltip("Dispensary");
-  trackVet = L.circleMarker([cur.lat, cur.lng], { radius: 9, color: "#2f6fed", fillColor: "#2f6fed", fillOpacity: 0.9 }).addTo(trackMap);
-  if (t.origin && t.destination) trackLine = L.polyline([[t.origin.lat, t.origin.lng], [t.destination.lat, t.destination.lng]], { color: "#2f6fed", dashArray: "5, 8" }).addTo(trackMap);
+  trackVet = L.circleMarker([cur.lat, cur.lng], { radius: 9, color: "#347a53", fillColor: "#347a53", fillOpacity: 0.9 }).addTo(trackMap);
+  if (t.origin && t.destination) trackLine = L.polyline([[t.origin.lat, t.origin.lng], [t.destination.lat, t.destination.lng]], { color: "#347a53", dashArray: "5, 8" }).addTo(trackMap);
 }
 
 function updateTrackMap(t) {
@@ -4826,7 +4826,7 @@ function diseaseTrendSection(diseaseTrends, trends) {
   const allDiseases = new Set();
   Object.values(diseaseTrends).forEach(arr => arr.forEach(d => allDiseases.add(d.disease)));
   const top3 = [...allDiseases].slice(0, 3);
-  const colors = ["#3f51b5", "#e53935", "#43a047"];
+  const colors = ["#347a53", "#e53935", "#43a047"];
   let html = `<div style="margin:8px 0">`;
   top3.forEach((disease, i) => {
     html += `<div style="margin:6px 0"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${colors[i]};margin-right:6px"></span><b>${disease}</b></div>`;

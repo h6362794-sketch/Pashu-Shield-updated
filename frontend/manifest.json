@@ -4,8 +4,8 @@
   "description": "Animal Disease Reporting, Veterinary Care & Surveillance Platform",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3f51b5",
+  "background_color": "#f3f8f4",
+  "theme_color": "#347a53",
   "orientation": "portrait-primary",
   "icons": [
     {
