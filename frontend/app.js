@@ -1599,8 +1599,8 @@ function barChart(items) {
       <div class="pm-chart-bars" style="display:flex;flex-direction:column;gap:12px">
       ${items.map(i => `
         <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span style="font-weight:600;color:var(--pm-text)">${escapeHtml(i.label)}</span><span style="font-weight:700;color:var(--pm-primary-dark);background:#f4f5ff;padding:2px 8px;border-radius:999px;font-size:12px">${escapeHtml(i.value)}</span></div>
-          <div style="background:#e8eaf3;border-radius:8px;height:14px;overflow:hidden;position:relative" aria-hidden="true">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span style="font-weight:600;color:var(--pm-text)">${escapeHtml(i.label)}</span><span style="font-weight:700;color:var(--pm-primary-dark);background:#FFFFFF;padding:2px 8px;border-radius:999px;font-size:12px">${escapeHtml(i.value)}</span></div>
+          <div style="background:#FFFFFF;border-radius:8px;height:14px;overflow:hidden;position:relative" aria-hidden="true">
             <div style="width:${Math.max((i.value / max) * 100, 3)}%;height:100%;background:linear-gradient(90deg,var(--pm-primary-light),var(--pm-primary));border-radius:8px;transition:width 0.3s ease"></div>
           </div>
         </div>`).join("")}
@@ -1610,7 +1610,7 @@ function barChart(items) {
       </details>
     </div>`;
 }
-const PIE_COLORS = ["#3d4db8", "#e2483f", "#1fa971", "#e08a1e", "#8e24aa", "#2f6fed", "#6d4c41", "#f4511e"];
+const PIE_COLORS = ["#2D8686", "#DC3545", "#198754", "#150202", "#0F5757", "#0D6EFD", "#150202", "#DC3545"];
 function pieChart(items) {
   if (!items || !items.length) return emptyState("No data yet.");
   const total = items.reduce((s, i) => s + i.value, 0) || 1;
@@ -1725,10 +1725,10 @@ document.addEventListener("change", (event) => event.target?.setCustomValidity?.
 
 // ================================================================= AUTH ==
 const ROLE_META = {
-  owner: { emoji: "🧑‍🌾", label: "role.owner", color: "#1fa971" },
-  vet: { emoji: "🩺", label: "role.vet", color: "#2f6fed" },
-  govt: { emoji: "🏛️", label: "role.govt", color: "#8e24aa" },
-  lab: { emoji: "🔬", label: "role.lab", color: "#00838f" },
+  owner: { emoji: "🧑‍🌾", label: "role.owner", color: "#198754" },
+  vet: { emoji: "🩺", label: "role.vet", color: "#0D6EFD" },
+  govt: { emoji: "🏛️", label: "role.govt", color: "#0F5757" },
+  lab: { emoji: "🔬", label: "role.lab", color: "#0F5757" },
 };
 
 // ---------------------------------------------------------- brand identity --
@@ -2659,7 +2659,7 @@ async function ownerDashboard() {
           <span class="action-icon" aria-hidden="true">🐄</span><span>${ft("my_livestock")}</span>
           <span class="pm-caption" style="margin-top:4px">${livestockCount} animal${livestockCount!==1?'s':''}</span>
         </button>
-        <button class="owner-action-card" onclick="location.hash='#/owner/report'" aria-label="${ft("report_problem")}" style="border-color:var(--pm-primary-light);background:#f8f9ff">
+        <button class="owner-action-card" onclick="location.hash='#/owner/report'" aria-label="${ft("report_problem")}" style="border-color:var(--pm-primary-light);background:#FFFFFF">
           <span class="action-icon" aria-hidden="true">📋</span><span>${ft("report_problem")}</span>
           <span class="pm-caption" style="margin-top:4px">Quick report</span>
         </button>
@@ -2761,7 +2761,7 @@ async function vetDashboard() {
     <div class="section-card">
       <h3 class="pm-h3" style="margin:0 0 10px">📞 IVR / Helpline Status</h3>
       <div class="pm-small" style="display:flex;align-items:center;gap:8px">
-        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${ivrStatus.pstn_connected ? '#1fa971' : '#e08a1e'};flex:none" aria-hidden="true"></span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${ivrStatus.pstn_connected ? '#198754' : '#150202'};flex:none" aria-hidden="true"></span>
         <span>Provider: <b>${escapeHtml(ivrStatus.provider_mode)}</b> · PSTN: <b>${ivrStatus.pstn_connected ? 'Connected' : 'Not Connected'}</b></span>
       </div>
       ${!ivrStatus.pstn_connected ? `<div class="pm-caption" style="margin-top:8px">${escapeHtml(ivrStatus.setup_instructions || '')}</div>` : ""}
@@ -3003,7 +3003,7 @@ async function labSampleDetailView(id) {
         <div style="margin-top:10px">
           <button class="btn btn-outline" onclick="document.getElementById('rejectBox').style.display='block'">❌ Reject Specimen</button>
         </div>
-        <div id="rejectBox" style="display:none;margin-top:10px;background:#fde6e4;padding:12px;border-radius:12px">
+        <div id="rejectBox" style="display:none;margin-top:10px;background:#EBEAEA;padding:12px;border-radius:12px">
           <div class="field"><label for="rejectReasonInput">Rejection Reason</label><input id="rejectReasonInput" placeholder="e.g. Hemolyzed, broken seal, delayed transport" /></div>
           <button class="btn btn-outline btn-sm" style="background:#fff" onclick="labReject(${safeId(s.id)})">Confirm Rejection</button>
         </div>
@@ -3357,14 +3357,14 @@ function initGisMap() {
   // Show warning if GIS data failed to load
   if (!gisState.outline) {
     const warning = document.createElement("div");
-    warning.style.cssText = "background:#fff3cd;padding:8px 12px;font-size:12px;border-radius:8px;margin-bottom:8px";
+    warning.style.cssText = "background:#EBEAEA;padding:8px 12px;font-size:12px;border-radius:8px;margin-bottom:8px";
     warning.innerHTML = "⚠️ Map boundary data unavailable. Using district centroids. <button class='btn btn-ghost btn-sm' onclick='location.hash=\"#/govt/gis\"'>Retry</button>";
     const mapEl = document.getElementById("gisMap");
     if (mapEl && mapEl.parentNode) mapEl.parentNode.insertBefore(warning, mapEl);
   }
   if (!gisState.locations || !gisState.locations.length) {
     const warning2 = document.createElement("div");
-    warning2.style.cssText = "background:#fff3cd;padding:8px 12px;font-size:12px;border-radius:8px;margin-bottom:8px";
+    warning2.style.cssText = "background:#EBEAEA;padding:8px 12px;font-size:12px;border-radius:8px;margin-bottom:8px";
     warning2.innerHTML = "⚠️ Location data unavailable — using district centroids.";
     const mapEl2 = document.getElementById("gisMap");
     if (mapEl2 && mapEl2.parentNode) mapEl2.parentNode.insertBefore(warning2, mapEl2);
@@ -3376,7 +3376,7 @@ function initGisMap() {
     }).addTo(map);
   }
   if (gisState.outline) {
-    L.geoJSON(gisState.outline, { style: { color: "#3b82f6", weight: 2, fillOpacity: 0.04, fillColor: "#3b82f6" } }).addTo(map);
+    L.geoJSON(gisState.outline, { style: { color: "#2D8686", weight: 2, fillOpacity: 0.04, fillColor: "#2D8686" } }).addTo(map);
   }
   gisState.map = map;
   gisState.layer = L.layerGroup().addTo(map);
@@ -3388,7 +3388,7 @@ function drawGis() {
   const { map, layer, geo, locations, disease, risks, showClusters, clusters } = gisState;
   if (!map || !layer) return;
   layer.clearLayers();
-  const colorFor = r => r === "High Risk" ? "#e2483f" : r === "Moderate Risk" ? "#e08a1e" : "#1fa971";
+  const colorFor = r => r === "High Risk" ? "#DC3545" : r === "Moderate Risk" ? "#150202" : "#198754";
   const filtered = geo.filter(d => {
     if (!risks.includes(d.risk_level)) return false;
     if (disease !== "All" && !d.diseases.some(x => x.label === disease)) return false;
@@ -3413,13 +3413,13 @@ function drawGis() {
     clusters.forEach(c => {
       L.circleMarker([c.lat, c.lng], {
         radius: Math.max(14, c.cases * 8),
-        color: "#8e24aa",
-        fillColor: "#e1bee7",
+        color: "#0F5757",
+        fillColor: "#D9F2F2",
         fillOpacity: 0.7,
         weight: 3,
         dashArray: "4, 4"
       }).bindTooltip(`
-        <div style="font-weight:800;color:#8e24aa">📍 Spatiotemporal Cluster: ${escapeHtml(c.cluster_id)}</div>
+        <div style="font-weight:800;color:#0F5757">📍 Spatiotemporal Cluster: ${escapeHtml(c.cluster_id)}</div>
         <div style="font-size:12px"><b>District:</b> ${escapeHtml(c.district)}</div>
         <div style="font-size:12px"><b>Cases:</b> ${escapeHtml(c.cases)} active</div>
         <div style="font-size:12px"><b>Diseases:</b> ${escapeHtml(c.diseases ? c.diseases.join(", ") : "HS")}</div>
@@ -3489,7 +3489,7 @@ function nationalSurveillanceView() {
     render(`
       ${header("National Surveillance", { back: true })}
       ${data.reporting_scope_note ? `
-        <div style="background:#e3f2fd;padding:10px 14px;border-radius:12px;margin:12px 16px;font-size:13px">
+        <div style="background:#FFFFFF;padding:10px 14px;border-radius:12px;margin:12px 16px;font-size:13px">
           📋 ${data.reporting_scope_note}
         </div>
       ` : ""}
@@ -3786,7 +3786,7 @@ route("#/govt/ai", async () => {
     <div class="section-card">
       <div class="section-title">🧠 Disease Risk Prediction</div>
       <div class="meta" style="margin-bottom:10px">
-        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${modelStatus.online ? '#43a047' : '#e53935'};margin-right:6px"></span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${modelStatus.online ? '#198754' : '#DC3545'};margin-right:6px"></span>
         ${modelStatus.online
           ? `AI model <b>online</b> — ${modelStatus.model}, accuracy ${Math.round(modelStatus.accuracy * 100)}% (ROC-AUC ${modelStatus.roc_auc})`
           : `⚠️ AI model <b>offline</b>. Start the ml-backend service (port 8000) to enable predictions.`}
@@ -4218,7 +4218,7 @@ function animalRecordView(role) {
         ${reproLatest && reproLatest.breeding_notes ? `<div class="small-muted" style="margin-top:6px"><b>Notes:</b> ${escapeHtml(reproLatest.breeding_notes)}</div>` : ""}
         ${canEdit ? `
           <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="document.getElementById('reproFormWrap').style.display='block'">+ Record Reproductive Event</button>
-          <div id="reproFormWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="reproFormWrap" style="display:none;margin-top:12px;background:#FFFFFF;padding:12px;border-radius:12px">
             <form id="reproForm">
               <div class="form-row">
                 <div class="field"><label for="pm_event_type">Event</label><select id="pm_event_type" name="event_type"<option>Pregnancy Check</option><option>AI</option><option>Natural Service</option><option>Calving</option><option>Abortion</option></select></div>
@@ -4251,7 +4251,7 @@ function animalRecordView(role) {
         </div>
         ${isVet ? `
           <button class="btn btn-outline btn-sm" onclick="document.getElementById('allergyFormWrap').style.display='block'">+ Add Known Allergy</button>
-          <div id="allergyFormWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="allergyFormWrap" style="display:none;margin-top:12px;background:#FFFFFF;padding:12px;border-radius:12px">
             <form id="allergyForm">
               <div class="form-row">
                 <div class="field"><label for="pm_allergen">Allergen Name</label><input id="pm_allergen" name="allergen" placeholder="e.g. Penicillin, NSAID, Sulfa" required /></div>
@@ -4274,7 +4274,7 @@ function animalRecordView(role) {
             <div class="stat-card"><div class="num" style="font-size:16px"><span class="badge ${riskBadgeClass(cds.risk_level)}">${cds.risk_level}</span></div><div class="lbl">Risk Classification</div></div>
             ${statCard(cds.confidence + "%", "Confidence")}
           </div>
-          <div class="demo-box" style="margin:8px 0;background:#fff8e1;border-left:4px solid #ffb300;color:#795548">
+          <div class="demo-box" style="margin:8px 0;background:#EBEAEA;border-left:4px solid #150202;color:#150202">
             <b>⚠️ Clinical Guidance Notice:</b> ${cds.disclaimer}
           </div>
           <div style="margin-top:10px">
@@ -4754,7 +4754,7 @@ function caseDetailView(role) {
           ${isVet ? `<button class="btn btn-ghost btn-sm" onclick="document.getElementById('sampleCollectWrap').style.display='block'">+ Collect Sample</button>` : ""}
         </div>
         ${isVet ? `
-          <div id="sampleCollectWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="sampleCollectWrap" style="display:none;margin-top:12px;background:#FFFFFF;padding:12px;border-radius:12px">
             <form id="sampleCollectForm">
               <div class="form-row">
                 <div class="field"><label for="pm_sample_type">Sample Type</label><select id="pm_sample_type" name="sample_type"<option>Blood Sample</option><option>Nasal Swab</option><option>Tissue Biopsy</option><option>Milk Sample</option><option>Fecal Sample</option></select></div>
@@ -4799,7 +4799,7 @@ function caseDetailView(role) {
           ${isVet ? `<button class="btn btn-ghost btn-sm" onclick="document.getElementById('trFormWrap').style.display='block'">+ Record Response</button>` : ""}
         </div>
         ${isVet ? `
-          <div id="trFormWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="trFormWrap" style="display:none;margin-top:12px;background:#FFFFFF;padding:12px;border-radius:12px">
             <form id="trForm">
               <div class="field"><label for="pm_response">Patient Response</label>
                 <select id="pm_response" name="response"
@@ -5003,7 +5003,7 @@ function trackingCardHTML(t, c, role) {
       <div class="tag-row" style="margin-bottom:12px">
         ${stages.map(([lbl, cls]) => `<span class="badge ${cls}">${lbl}</span>`).join("")}
       </div>
-      <div id="trackMap" style="height:240px;width:100%;border-radius:14px;overflow:hidden;background:#e5e5e5"></div>
+      <div id="trackMap" style="height:240px;width:100%;border-radius:14px;overflow:hidden;background:#EBEAEA"></div>
       ${v ? `
         <div class="row1 tracking-meta" style="margin-top:10px;font-size:13px">
           <div><b>${localized ? ft("eta") : "ETA"}:</b> ${v.status === "ON_THE_WAY" ? `${Math.ceil(t.eta_seconds / 60)} ${localized ? ft("minutes") : "mins"}` : v.status === "ARRIVED" ? (localized ? ft("tracking_arrived") : "Arrived") : (localized ? ft("tracking_visit_done") : "Completed")}</div>
@@ -5031,8 +5031,8 @@ function initTrackMap(t, role) {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(trackMap);
   L.marker([t.destination.lat, t.destination.lng]).addTo(trackMap).bindTooltip(role === "owner" ? `📍 ${ft("location")} · ${ft("animal")}` : "📍 Animal Location");
   if (t.origin) L.marker([t.origin.lat, t.origin.lng]).addTo(trackMap).bindTooltip("Dispensary");
-  trackVet = L.circleMarker([cur.lat, cur.lng], { radius: 9, color: "#2f6fed", fillColor: "#2f6fed", fillOpacity: 0.9 }).addTo(trackMap);
-  if (t.origin && t.destination) trackLine = L.polyline([[t.origin.lat, t.origin.lng], [t.destination.lat, t.destination.lng]], { color: "#2f6fed", dashArray: "5, 8" }).addTo(trackMap);
+  trackVet = L.circleMarker([cur.lat, cur.lng], { radius: 9, color: "#0D6EFD", fillColor: "#0D6EFD", fillOpacity: 0.9 }).addTo(trackMap);
+  if (t.origin && t.destination) trackLine = L.polyline([[t.origin.lat, t.origin.lng], [t.destination.lat, t.destination.lng]], { color: "#0D6EFD", dashArray: "5, 8" }).addTo(trackMap);
 }
 
 function updateTrackMap(t) {
@@ -5496,7 +5496,7 @@ function diseaseTrendSection(diseaseTrends, trends) {
   const allDiseases = new Set();
   Object.values(diseaseTrends).forEach(arr => arr.forEach(d => allDiseases.add(d.disease)));
   const top3 = [...allDiseases].slice(0, 3);
-  const colors = ["#3f51b5", "#e53935", "#43a047"];
+  const colors = ["#2D8686", "#DC3545", "#198754"];
   let html = `<div style="margin:8px 0">`;
   top3.forEach((disease, i) => {
     html += `<div style="margin:6px 0"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${colors[i]};margin-right:6px"></span><b>${disease}</b></div>`;
@@ -5795,7 +5795,7 @@ route("#/govt/zoonotic", async () => {
     render(`
       ${header("Zoonotic Disease Risk", { back: true })}
       ${data.active_zoonotic_cases > 0 ? `
-        <div style="background:#fde6e4;padding:12px;border-radius:12px;margin:12px 16px;border-left:4px solid #e53935">
+        <div style="background:#EBEAEA;padding:12px;border-radius:12px;margin:12px 16px;border-left:4px solid #DC3545">
           <b>⚠️ ${data.active_zoonotic_cases} active zoonotic case(s) detected!</b>
           <div class="small-muted">These diseases can transmit from animals to humans. PPE precautions required.</div>
         </div>

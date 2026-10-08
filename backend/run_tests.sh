@@ -54,6 +54,8 @@ SUITES=(
   test_all_features
   test_ml_service
   test_compliance
+  # Added by the DBIM redesign merge: client/server validation parity vectors.
+  tests/test_validators
 )
 
 pass=0

@@ -1,0 +1,2 @@
+{ "defaults": { "runners": ["axe"], "standard": "WCAG2AA", "timeout": 60000, "chromeLaunchConfig": { "args": ["--no-sandbox"] } },
+  "urls": ["http://localhost:8080/", "http://localhost:8080/#/about", "http://localhost:8080/#/contact", "http://localhost:8080/#/help", "http://localhost:8080/#/feedback", "http://localhost:8080/#/search", "http://localhost:8080/#/sitemap", "http://localhost:8080/#/policies", "http://localhost:8080/#/login/owner"] }

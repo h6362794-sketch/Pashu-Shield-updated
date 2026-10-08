@@ -4,8 +4,8 @@
   "description": "Animal Disease Reporting, Veterinary Care & Surveillance Platform",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3d4db8",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0F5757",
   "icons": [
     {
       "src": "assets/pashu-mitra-logo.png",

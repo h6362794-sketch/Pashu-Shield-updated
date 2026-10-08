@@ -422,13 +422,26 @@ class FrontendComplianceTest(unittest.TestCase):
         self.assertIn("opens in a new window", shell)
 
     def test_67_high_contrast_does_not_change_the_default_theme(self):
-        """Exemption 4.3 — brand colours preserved when high contrast is off."""
+        """Exemption 4.3 — brand colours preserved when high contrast is off.
+
+        Pashu-Mitra DBIM redesign merge: the literal brand palette moved out of
+        style.css into the DBIM design tokens in frontend/dbim-tokens.css, which
+        style.css now references as var(--dbim-*). This test therefore asserts
+        the token pipeline rather than the retired hex constants. The invariant
+        it protects is unchanged — the default (high contrast OFF) theme keeps
+        its brand colours, and high contrast stays opt-in behind a scoped class.
+        """
         css = read_frontend("style.css")
-        # The original brand palette is intact.
-        for token, value in (("--primary:#3d4db8", None), ("--primary-dark:#2c3690", None),
-                             ("--bg:#eef0f6", None), ("--green:#1fa971", None),
-                             ("--red:#e2483f", None)):
-            self.assertIn(token, css, f"brand token altered: {token}")
+        tokens = read_frontend("dbim-tokens.css")
+        # The default theme still declares every brand token.
+        for token in ("--primary", "--primary-dark", "--bg", "--green", "--red"):
+            self.assertRegex(css, re.escape(token) + r"\s*:", f"brand token dropped: {token}")
+        # The DBIM palette is now the single source of truth for those colours.
+        for name, value in (("--dbim-key", "#0F5757"), ("--dbim-mid", "#2D8686"),
+                            ("--dbim-light", "#A6D9D9"), ("--dbim-tint", "#D9F2F2"),
+                            ("--dbim-success", "#198754"), ("--dbim-error", "#DC3545")):
+            self.assertRegex(tokens, re.escape(name) + r"\s*:\s*" + re.escape(value),
+                             f"DBIM brand token altered: {name}")
         # High contrast is scoped to an opt-in class only.
         self.assertIn("html.pm-high-contrast{", css)
 

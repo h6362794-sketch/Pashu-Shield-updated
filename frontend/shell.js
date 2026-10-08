@@ -391,6 +391,23 @@
   function init() {
     loadPrefs();
 
+    // DBIM Header 3 shell (frontend/dbim-shell.js, redesign merge). When it is
+    // present it owns the header, global navigation, footer and cookie banner;
+    // this file then keeps ONLY preferences, announcements, page metadata and
+    // breadcrumbs, so nothing is rendered twice and no behaviour is lost.
+    if (window.PMShell3 && typeof window.PMShell3.mount === "function") {
+      window.PMShell3.mount();
+      if (typeof window.PMShell3.bind === "function") window.PMShell3.bind();
+      applyPrefs();
+      try {
+        if (!localStorage.getItem(STORE)) {
+          const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+          if (mq && mq.matches) { prefs.reducedMotion = true; savePrefs(); applyPrefs(); }
+        }
+      } catch (_) {}
+      return;
+    }
+
     const barHost = document.getElementById("pmA11yBarHost");
     if (barHost) barHost.innerHTML = renderA11yBar();
 

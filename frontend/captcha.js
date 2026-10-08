@@ -32,7 +32,7 @@
   function renderMathChallenge(container) {
     if (!container) return;
     container.innerHTML = `
-      <div class="field" style="border:1px solid #e2e5f0;padding:12px;border-radius:12px;background:#fbfbfe">
+      <div class="field" style="border:1px solid #D9F2F2;padding:12px;border-radius:12px;background:#FFFFFF">
         <label for="pmCaptchaAlt">Accessible verification — ${escapeHtml(mathChallenge ? mathChallenge.question : "Loading challenge...")}</label>
         <input id="pmCaptchaAlt" name="captcha_alt_answer" type="number" inputmode="numeric" autocomplete="off" placeholder="Enter answer" aria-describedby="pmCaptchaAltHelp" />
         <p id="pmCaptchaAltHelp" class="pm-help">If you cannot complete the visual CAPTCHA, answer this math question. Audio alternative would be provided by the CAPTCHA provider when configured.</p>

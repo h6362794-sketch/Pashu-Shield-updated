@@ -1,0 +1,6 @@
+# RFC 9116. Placeholders must be replaced by the owner before release.
+Contact: mailto:[OWNER ACTION: security contact email]
+Expires: 2027-10-07T00:00:00.000Z
+Preferred-Languages: en, hi
+Policy: https://[OWNER ACTION: deployment URL]/#/policies/security
+Canonical: https://[OWNER ACTION: deployment URL]/.well-known/security.txt

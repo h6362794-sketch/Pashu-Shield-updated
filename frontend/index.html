@@ -3,12 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="theme-color" content="#3d4db8" />
+<meta name="theme-color" content="#0F5757" />
 <meta name="description" content="Pashu-Mitra: animal disease reporting, veterinary care, laboratory diagnostics and disease surveillance for livestock owners, veterinarians, laboratories and government officers." />
 <meta name="keywords" content="animal health, livestock, disease reporting, veterinary, laboratory, surveillance, Pashu-Mitra" />
 <title>Pashu-Mitra — Animal Disease Reporting &amp; Veterinary Care</title>
 <link rel="canonical" href="./" />
 <link rel="stylesheet" href="style.css" />
+<!-- DBIM 3.0 design tokens + shell (Phase 1 of the redesign merge) — must load after style.css -->
+<link rel="stylesheet" href="dbim-tokens.css" />
+<link rel="stylesheet" href="dbim-shell.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 <link rel="manifest" href="manifest.json" />
 <!-- Official product logo (assets/pashu-mitra-logo.png). Used as the favicon
@@ -26,6 +29,8 @@
   <!-- Organization / owner configuration (placeholders are clearly marked).
        Loaded before the shell so ORG is available while rendering. -->
   <script src="org-config.js"></script>
+  <script src="validators.js"></script>
+  <script src="dbim-shell.js"></script>
   <script src="shell.js"></script>
 
   <!-- Global accessibility control bar (A- / A / A+, high contrast, motion) -->
@@ -47,6 +52,8 @@
 
   <!-- Global site footer (GIGW Q02/Q05/Q09-Q12/Q18 minimum content) -->
   <div id="pmFooterHost"></div>
+  <!-- Cookie consent banner (DBIM 7.6, DPDP Act 2023) -->
+  <div id="pmCookieHost"></div>
 
   <!-- Accessibility helpers: focus trap, dialogs, cards, forms, live regions -->
   <script src="a11y.js"></script>

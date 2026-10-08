@@ -1,0 +1,127 @@
+/* ==========================================================================
+ * Pashu Mitra — DBIM 3.0 design tokens (Phase 1)
+ * Loaded AFTER style.css. style.css consumes the --dbim-* variables below.
+ *
+ * DBIM 2.1  primary palette: ONE colour group per product (Green selected).
+ *           Swap group with ONE line:  <html data-dbim-theme="blue">
+ * DBIM 2.2  functional palette for everything else.
+ * DBIM 4    Noto Sans, desktop/mobile type scale.
+ * GIGW 3.0 5.2 / WCAG 1.4.3, 1.4.11, 1.4.12, 2.4.7  contrast, spacing, focus.
+ * NOTE: hex values are from the scanned DBIM PDF and are UNVERIFIED against
+ *       https://dbimtoolkit.digifootprint.gov.in (no network in build env).
+ *       See docs/compliance/DECISIONS.md D-02.
+ * ========================================================================== */
+
+/* ---- DBIM 2.1 primary palette: Green group (default) ---- */
+:root{
+  --dbim-key:   #0F5757;   /* key colour (darkest) – text, links, buttons, footer */
+  --dbim-mid:   #2D8686;   /* NON-TEXT only: 4.32:1 on white, 3.59:1 on Linen */
+  --dbim-light: #A6D9D9;   /* decorative / dark-mode accents */
+  --dbim-tint:  #D9F2F2;   /* tinted panels (use Brown text) */
+}
+/* Blue group (DBIM 2.1) – proof the swap is one line. Other groups
+   (Burgundy, Purple, Chrome Yellow, Cinnamon Red) to be added once their
+   hex values are verified against the Toolkit; they are NOT guessed here. */
+html[data-dbim-theme="blue"]{
+  --dbim-key:#162F6A; --dbim-mid:#214AAB; --dbim-light:#A3BBF3; --dbim-tint:#D2DFFF;
+}
+
+/* ---- DBIM 2.2 functional palette ---- */
+:root{
+  --dbim-linen:#EBEAEA;        /* cards, quote blocks */
+  --dbim-white:#FFFFFF;        /* Inclusive White: page background */
+  --dbim-brown:#150202;        /* Deep Earthy Brown: text on light */
+  --dbim-black:#000000;
+  --dbim-success:#198754;      /* Liberty Green */
+  --dbim-warning:#FFC107;      /* Mustard Yellow: BACKGROUND with Brown text only */
+  --dbim-error:#DC3545;        /* Coral Red */
+  --dbim-info:#0D6EFD;         /* Blue: links / info */
+  --dbim-grey-1:#C6C6C6;       /* decorative dividers only (1.71:1) */
+  --dbim-grey-2:#8E8E8E;       /* disabled only (3.28:1) */
+  --dbim-grey-3:#606060;       /* secondary text, input borders (6.29:1) */
+  /* #1D0A69 Deep Blue is reserved for the Gov.in root site: never used. */
+}
+
+/* ---- DBIM 4.3 type scale (desktop) ---- */
+:root{
+  --dbim-fs-h1:36px; --dbim-fs-h2:24px; --dbim-fs-h3:20px;
+  --dbim-fs-p1:16px; --dbim-fs-p2:14px; --dbim-fs-sm:12px;
+  --dbim-lh:1.5;
+}
+/* ---- DBIM 4.3 type scale (mobile) ---- */
+@media (max-width:767px){
+  :root{
+    --dbim-fs-h1:24px; --dbim-fs-h2:20px; --dbim-fs-h3:16px;
+    --dbim-fs-p1:14px; --dbim-fs-p2:12px; --dbim-fs-sm:10px;
+  }
+}
+
+/* ---- DBIM 4.1 Noto Sans, self-hosted, one file per script and weight.
+        Files are produced by scripts/fetch-fonts.sh (needs network).
+        Until then the system stack below is used; nothing breaks. ---- */
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:400;font-display:swap;
+  src:local("Noto Sans"),url("fonts/NotoSans-latin-400.woff2") format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:500;font-display:swap;src:local("Noto Sans Medium"),url("fonts/NotoSans-latin-500.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F,U+20AC;}
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:600;font-display:swap;src:local("Noto Sans SemiBold"),url("fonts/NotoSans-latin-600.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F,U+20AC;}
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:700;font-display:swap;src:local("Noto Sans Bold"),url("fonts/NotoSans-latin-700.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F,U+20AC;}
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:400;font-display:swap;src:local("Noto Sans Devanagari"),url("fonts/NotoSans-devanagari-400.woff2") format("woff2");unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20A8,U+20B9,U+25CC,U+A830-A839,U+A8E0-A8FF;}
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/NotoSans-devanagari-500.woff2") format("woff2");unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20B9,U+25CC,U+A8E0-A8FF;}
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/NotoSans-devanagari-600.woff2") format("woff2");unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20B9,U+25CC,U+A8E0-A8FF;}
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/NotoSans-devanagari-700.woff2") format("woff2");unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20B9,U+25CC,U+A8E0-A8FF;}
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:400;font-display:swap;src:local("Noto Sans Telugu"),url("fonts/NotoSans-telugu-400.woff2") format("woff2");unicode-range:U+0C00-0C7F,U+1CDA,U+200C-200D,U+25CC;}
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/NotoSans-telugu-500.woff2") format("woff2");unicode-range:U+0C00-0C7F,U+200C-200D,U+25CC;}
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/NotoSans-telugu-600.woff2") format("woff2");unicode-range:U+0C00-0C7F,U+200C-200D,U+25CC;}
+@font-face{font-family:"Noto Sans";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/NotoSans-telugu-700.woff2") format("woff2");unicode-range:U+0C00-0C7F,U+200C-200D,U+25CC;}
+
+:root{
+  --dbim-font:"Noto Sans","Noto Sans Devanagari","Noto Sans Telugu",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+/* ---- Base typography (DBIM 4.2/4.3, WCAG 1.4.4/1.4.12) ---- */
+html{ -webkit-text-size-adjust:100%; }
+body{
+  font-family:var(--dbim-font);
+  font-size:calc(var(--dbim-fs-p1) * var(--pm-text-scale, 1));
+  line-height:var(--dbim-lh);
+  background:var(--dbim-white);
+  color:var(--dbim-brown);
+  text-align:left;                       /* DBIM 4.2: body left-aligned */
+}
+button,input,select,textarea{ font-family:inherit; }
+h1{ font-size:calc(var(--dbim-fs-h1) * var(--pm-text-scale, 1)); font-weight:700; line-height:1.2; }
+h2{ font-size:calc(var(--dbim-fs-h2) * var(--pm-text-scale, 1)); font-weight:600; line-height:1.3; }
+h3{ font-size:calc(var(--dbim-fs-h3) * var(--pm-text-scale, 1)); font-weight:600; line-height:1.3; }
+
+/* ---- Links: always underlined, never colour-only (WCAG 1.4.1) ---- */
+main a:not([class]), .pm-footer a{ text-decoration:underline; text-underline-offset:2px; }
+main a:not([class]){ color:var(--dbim-key); }
+main a:not([class]):hover{ text-decoration-thickness:3px; }
+
+/* ---- Form controls: #606060 borders (>=3:1, WCAG 1.4.11) ---- */
+input:not([type=checkbox]):not([type=radio]), select, textarea{
+  border-color:var(--dbim-grey-3);
+  background-color:var(--dbim-white);
+  color:var(--dbim-brown);
+}
+::placeholder{ color:var(--dbim-grey-3); opacity:1; }
+
+/* ---- Buttons: distinct enabled / hover / focus / disabled (DBIM 4.4) ----
+   Hover inverts (white + key border) because the only lighter group shade
+   with white text, #2D8686, fails 4.5:1. See DECISIONS.md D-03. */
+.btn-primary{ background:var(--dbim-key); color:var(--dbim-white); box-shadow:inset 0 0 0 2px var(--dbim-key); }
+.btn-primary:hover{ background:var(--dbim-white); color:var(--dbim-key); }
+.btn-primary:active{ background:var(--dbim-tint); color:var(--dbim-key); }
+.btn[disabled], .btn[aria-disabled="true"]{
+  background:var(--dbim-linen); color:var(--dbim-grey-3); box-shadow:inset 0 0 0 2px var(--dbim-grey-2);
+  cursor:not-allowed;
+}
+
+/* ---- Focus: >=2px, never removed (WCAG 2.4.7 / 2.4.11) ---- */
+:focus-visible{ outline:3px solid var(--dbim-key); outline-offset:2px; }
+.pm-footer :focus-visible{ outline-color:var(--dbim-white); }
+
+/* ---- Reduced motion (WCAG 2.3.3) ---- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+}

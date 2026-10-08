@@ -1,0 +1,116 @@
+/* Pashu Mitra — Header 3, navigation, footer, cookie banner (DBIM 5.4.3, 5.6, 7.6).
+ * Mobile first (320px up). Colours come from dbim-tokens.css only. Touch targets >= 44px.
+ * Motion respects prefers-reduced-motion (see dbim-tokens.css). */
+html{ scroll-padding-top:96px; }                         /* focus never hidden under the sticky header (WCAG 2.4.11) */
+.pm-sticky-top{ position:sticky; top:0; z-index:60; background:var(--dbim-white); box-shadow:0 1px 0 var(--dbim-grey-1); }
+.pm-ico{ flex:none; }
+
+/* ---- main bar: Lockup 3B, nav, sign-in ---- */
+.pm-mainbar{ background:var(--dbim-white); }
+.pm-mainbar-in{ max-width:1280px; margin:0 auto; padding:0 12px; display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; justify-content:space-between; }
+.pm-brand{ display:inline-flex; align-items:center; text-decoration:none; min-height:44px; }
+.pm-mbtns{ display:flex; gap:4px; }
+.pm-ibtn-text, .pm-disc{
+  display:inline-flex; align-items:center; gap:6px; min-height:44px; min-width:44px; padding:0 10px;
+  background:transparent; color:var(--dbim-key); border:2px solid transparent; border-radius:6px; font:inherit; font-weight:600; cursor:pointer; text-decoration:none;
+}
+.pm-ibtn-text:hover, .pm-disc:hover{ background:var(--dbim-white); border-color:var(--dbim-key); }
+.pm-ibtn-text[aria-expanded="true"], .pm-disc[aria-expanded="true"]{ background:var(--dbim-tint); border-color:var(--dbim-key); }
+.pm-navwrap{ display:none; width:100%; padding-bottom:12px; }
+.pm-navwrap.is-open{ display:block; }
+.pm-gnav-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.pm-navlink{ display:flex; align-items:center; min-height:44px; padding:0 10px; color:var(--dbim-key); font-weight:600; text-decoration:none; border-bottom:1px solid var(--dbim-grey-1); }
+.pm-navlink:hover{ text-decoration:underline; }
+.pm-has-sub .pm-disc{ width:100%; justify-content:space-between; border-radius:0; }
+.pm-panel{ background:var(--dbim-linen); padding:8px 12px; }
+.pm-sub{ list-style:none; margin:0; padding:0; }
+.pm-sub a{ display:flex; align-items:center; min-height:44px; color:var(--dbim-brown); text-decoration:underline; text-underline-offset:2px; }
+.pm-subnote{ margin:4px 0; font-size:calc(var(--dbim-fs-p2) * var(--pm-text-scale, 1)); color:var(--dbim-grey-3); }
+.pm-signin{ margin-top:8px; }
+
+/* ---- engagement bar (search + user controls) ---- */
+.pm-eng{ display:none; background:var(--dbim-linen); border-top:1px solid var(--dbim-grey-1); }
+.pm-eng.is-open{ display:block; }
+.pm-eng-in{ max-width:1280px; margin:0 auto; padding:8px 12px; display:flex; flex-direction:column; gap:8px; }
+.pm-hsearch{ display:flex; gap:4px; flex:1; max-width:520px; }
+.pm-hsearch input{ flex:1; min-width:0; min-height:44px; padding:0 12px; border:2px solid var(--dbim-grey-3); border-radius:6px; background:var(--dbim-white); color:var(--dbim-brown); font:inherit; }
+.pm-ibtn{ min-width:44px; min-height:44px; display:inline-flex; align-items:center; justify-content:center; background:var(--dbim-key); color:var(--dbim-white); border:2px solid var(--dbim-key); border-radius:6px; cursor:pointer; }
+.pm-ibtn:hover{ background:var(--dbim-white); color:var(--dbim-key); }
+.pm-ibtn[aria-pressed="true"]{ background:var(--dbim-warning); color:var(--dbim-brown); border-color:var(--dbim-brown); }
+.pm-uctl{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.pm-tsz{ display:inline-flex; gap:4px; }
+.pm-langsel{ display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 8px; border:2px solid var(--dbim-grey-3); border-radius:6px; background:var(--dbim-white); color:var(--dbim-brown); }
+.pm-langicon{ font-weight:600; white-space:nowrap; }
+.pm-langsel select{ min-height:40px; border:0; background:transparent; color:var(--dbim-brown); font:inherit; }
+.pm-sr-link{ color:var(--dbim-key); text-decoration:underline; display:inline-flex; align-items:center; min-height:44px; }
+
+/* ---- desktop: nav inline, engagement bar always visible ---- */
+@media (min-width:900px){
+  .pm-mbtns{ display:none; }
+  .pm-navwrap{ display:flex; width:auto; flex:1; align-items:center; justify-content:flex-end; gap:8px; padding-bottom:0; }
+  .pm-gnav-list{ flex-direction:row; align-items:center; gap:2px; }
+  .pm-navlink{ border-bottom:0; border-radius:6px; }
+  .pm-has-sub{ position:relative; }
+  .pm-has-sub .pm-disc{ width:auto; }
+  .pm-panel{ position:absolute; left:0; top:100%; min-width:260px; z-index:70; border:1px solid var(--dbim-grey-3); border-radius:6px; box-shadow:0 6px 20px rgba(21,2,2,.18); }
+  .pm-signin{ margin-top:0; position:relative; }
+  .pm-signin .pm-panel{ left:auto; right:0; }
+  .pm-eng{ display:block; order:-1; }                       /* engagement bar sits above the main bar */
+  .pm-eng-in{ flex-direction:row; align-items:center; justify-content:space-between; }
+  .pm-h3{ display:flex; flex-direction:column; }
+  .pm-h3 .pm-eng{ order:-1; }
+}
+
+/* ---- ticker (only rendered when ORG.announcements is non-empty) ---- */
+.pm-ticker{ display:flex; align-items:center; gap:8px; max-width:1280px; margin:0 auto; padding:0 12px; background:var(--dbim-linen); }
+.pm-ticker-list{ list-style:none; margin:0; padding:0; display:flex; gap:32px; overflow:hidden; white-space:nowrap; animation:pm-tick 30s linear infinite; }
+.pm-ticker-list.is-paused{ animation-play-state:paused; }
+@keyframes pm-tick{ from{ transform:translateX(0);} to{ transform:translateX(-30%);} }
+.pm-ticker a{ color:var(--dbim-key); }
+
+/* ---- footer (key colour, Inclusive White text, white lockup) ---- */
+.pm-f3{ background:var(--dbim-key); color:var(--dbim-white); margin-top:24px; }
+.pm-f3 a, .pm-f3 .pm-linkbtn{ color:var(--dbim-white); text-decoration:underline; text-underline-offset:2px; }
+.pm-f3 a:hover, .pm-f3 .pm-linkbtn:hover{ text-decoration-thickness:3px; }
+.pm-f3-top, .pm-f3-grid, .pm-f3-bar{ max-width:1280px; margin:0 auto; padding:16px 14px; }
+.pm-f3-top{ display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px; border-bottom:1px solid var(--dbim-white); }
+.pm-f3 h2{ font-size:calc(var(--dbim-fs-p1) * var(--pm-text-scale, 1)); font-weight:700; margin:0 0 8px; color:var(--dbim-white); }
+.pm-f3-grid{ display:grid; grid-template-columns:1fr; gap:20px; }
+@media (min-width:600px){ .pm-f3-grid{ grid-template-columns:repeat(2,1fr); } }
+@media (min-width:1024px){ .pm-f3-grid{ grid-template-columns:repeat(5,1fr); } }
+.pm-f3 ul{ list-style:none; margin:0; padding:0; }
+.pm-f3 li{ margin:0; }
+.pm-f3 li a, .pm-f3 li{ line-height:1.5; }
+.pm-f3 nav li a{ display:inline-flex; align-items:center; min-height:44px; }
+.pm-f3-note{ font-size:calc(var(--dbim-fs-p2) * var(--pm-text-scale, 1)); }
+.pm-f3-bar{ border-top:1px solid var(--dbim-white); font-size:calc(var(--dbim-fs-p2) * var(--pm-text-scale, 1)); }
+.pm-f3-bar p{ margin:4px 0; }
+.pm-linkbtn{ background:none; border:0; padding:0; font:inherit; cursor:pointer; min-height:44px; }
+.pm-f3 :focus-visible{ outline:3px solid var(--dbim-white); outline-offset:2px; }
+
+/* ---- cookie banner (bottom of page; nothing pre-ticked) ---- */
+.pm-cookie{ position:fixed; left:0; right:0; bottom:0; z-index:80; background:var(--dbim-white); color:var(--dbim-brown); border-top:3px solid var(--dbim-key); padding:12px 14px; max-height:70vh; overflow:auto; box-shadow:0 -4px 16px rgba(21,2,2,.18); }
+.pm-cookie[hidden]{ display:none; }
+.pm-cookie h2{ margin:0 0 4px; font-size:calc(var(--dbim-fs-p1) * var(--pm-text-scale, 1)); }
+.pm-ck-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.pm-ck-panel{ margin:8px 0; }
+.pm-ck-opt{ display:flex; gap:8px; align-items:flex-start; min-height:44px; padding:6px 0; }
+.pm-ck-opt input{ width:24px; height:24px; flex:none; }
+
+/* ---- high contrast opt-in theme ---- */
+html.pm-high-contrast .pm-sticky-top, html.pm-high-contrast .pm-mainbar, html.pm-high-contrast .pm-eng, html.pm-high-contrast .pm-panel{ background:#000; color:#fff; }
+html.pm-high-contrast .pm-navlink, html.pm-high-contrast .pm-disc, html.pm-high-contrast .pm-ibtn-text, html.pm-high-contrast .pm-sub a, html.pm-high-contrast .pm-sr-link{ color:#fff; }
+html.pm-high-contrast .pm-f3, html.pm-high-contrast .pm-cookie{ background:#000; color:#fff; border-color:#fff; }
+
+/* ---- home blocks ---- */
+.pm-home-block{ background:var(--dbim-linen); border-radius:8px; padding:12px 16px; margin:16px 0; }
+.pm-home-block h2{ margin:0 0 8px; }
+.pm-home-list{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:4px 16px; }
+.pm-home-list a{ display:flex; align-items:center; min-height:44px; }
+
+/* ---- official logo (Pashu-Mitra green cross + cow head) ----
+   The artwork is used byte-for-byte: only the height is constrained and the
+   intrinsic ratio is preserved, so the mark is never stretched or cropped. */
+.pm-logo-img{ height:44px; width:auto; object-fit:contain; display:block; }
+.pm-f3 .pm-logo-img, .pm-logo-chip .pm-logo-img{ height:40px; }
+.pm-logo-chip{ background:var(--dbim-white); border-radius:8px; padding:6px 10px; display:inline-flex; align-items:center; }

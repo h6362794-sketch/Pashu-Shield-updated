@@ -14,7 +14,11 @@
    keyboard operable cards, form error handling, live regions, etc.
    ================================================================= */
 
-const CACHE_NAME = "pashu-mitra-v9";  // bumped: a11y.js + global shell + GIGW info pages
+/* v10 (Pashu-Mitra DBIM redesign merge) adds the DBIM design tokens, the DBIM
+   shell (header/nav/footer/cookie consent) and the shared field validators.
+   Self-hosted Noto Sans woff2 files are intentionally NOT pre-cached: they are
+   fetched on demand and cached by the runtime strategy below. */
+const CACHE_NAME = "pashu-mitra-v10";  // bumped: DBIM redesign shell (tokens, shell css/js, validators)
 const STATIC_ASSETS = [
   "/",
   "/index.html",
@@ -24,6 +28,10 @@ const STATIC_ASSETS = [
   "/org-config.js",
   "/shell.js",
   "/info-pages.js",
+  "/dbim-tokens.css",
+  "/dbim-shell.css",
+  "/dbim-shell.js",
+  "/validators.js",
   "/call.js",
   "/vendor/socket.io.min.js",
   "/maharashtra_locations.json",
