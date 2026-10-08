@@ -9,21 +9,21 @@ jobs:
         with: { node-version: 20 }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - name: Syntax (lint substitute: no build step in this repo)
+      - name: "Syntax (lint substitute: no build step in this repo)"
         run: for f in frontend/*.js; do node --check "$f"; done
-      - name: Frontend tests (header/footer/consent, validators, a11y static, XSS, branding)
+      - name: "Frontend tests (header/footer/consent, validators, a11y static, XSS, branding)"
         run: node --test frontend/tests/*.test.mjs
-      - name: Contrast gate (WCAG 1.4.3 / 1.4.11)
+      - name: "Contrast gate (WCAG 1.4.3 / 1.4.11)"
         run: node scripts/check-contrast.mjs
       - name: Image budgets
         run: node scripts/check-images.mjs
       - name: Backend validator tests
         run: python -m unittest discover -s backend/tests -p "test_validators.py"
-      - name: Dependency audit ("Safe to Host" evidence)
+      - name: 'Dependency audit ("Safe to Host" evidence)'
         run: |
           pip install pip-audit
           pip-audit -r backend/requirements.txt || true   # record result in docs/compliance/SECURITY_CHECKLIST.md
-      - name: External link check (weekly)
+      - name: "External link check (weekly)"
         if: github.event_name == 'schedule'
         run: node scripts/check-links.mjs
   lighthouse-axe:
@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - name: Lighthouse CI (mobile) + pa11y/axe
+      - name: "Lighthouse CI (mobile) + pa11y/axe"
         run: |
           npm i -g @lhci/cli@0.14 pa11y-ci@3 http-server
           http-server frontend -p 8080 -s & sleep 2
