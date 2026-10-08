@@ -314,7 +314,7 @@ const I18N = {
     "auth.choose": "तुमचे पोर्टल निवडा", "auth.newHere": "नवीन आहात?",
     "auth.haveAccount": "आधीच नोंदणी केली आहे?", "auth.createAccount": "खाते तयार करा",
     "lang.label": "भाषा",
-    "farmer.app_name": "पशुमित्र",
+    "farmer.app_name": "Pashu-Mitra",
     "farmer.home": "मुख्यपृष्ठ", "farmer.dashboard_title": "तुमचे शेत",
     "farmer.welcome_back": "पुन्हा स्वागत आहे,", "farmer.home_prompt": "तुम्हाला काय करायचे आहे?",
     "farmer.my_livestock": "माझे पशुधन", "farmer.add_animal": "प्राणी जोडा", "farmer.add_herd": "कळप जोडा",
@@ -414,7 +414,7 @@ const I18N = {
     "farmer.notification_auto_escalation": "तातडीचे: अहवाल {case} कडे लगेच लक्ष देणे आवश्यक आहे.",
     "farmer.mobile_label": "मोबाईल", "farmer.email": "ईमेल", "farmer.specialization": "विशेषता",
     "farmer.current_language": "सध्याची भाषा", "farmer.logout": "बाहेर पडा", "farmer.user": "वापरकर्ता",
-    "farmer.helpline_title": "प्राण्यासाठी मदत हवी आहे?", "farmer.helpline_name": "पशु-मित्र मदत क्रमांक",
+    "farmer.helpline_title": "प्राण्यासाठी मदत हवी आहे?", "farmer.helpline_name": "Pashu-Mitra मदत क्रमांक",
     "farmer.call_now": "आता कॉल करा", "farmer.desktop_call_note": "या क्रमांकावर मोबाईलवरून कॉल करा.",
     "farmer.not_found": "पान सापडले नाही.", "farmer.go_home": "मुख्यपृष्ठावर जा", "farmer.error": "काहीतरी चूक झाली.",
     "farmer.offline_queued": "इंटरनेट नाही. विनंती जतन केली आहे; इंटरनेट आल्यावर पाठवली जाईल.",
@@ -446,7 +446,7 @@ const I18N = {
     "farmer.register_error": "माहिती तपासून पुन्हा प्रयत्न करा.",
     // ---- OTP login (farmer) ----
     "farmer.otp_title": "मोबाईल OTP ने लॉगिन", "farmer.otp_mobile_label": "नोंदणीकृत मोबाईल क्रमांक",
-    "farmer.otp_mobile_hint": "पशुमित्रात नोंदवलेला १० अंकी मोबाईल क्रमांक लिहा.",
+    "farmer.otp_mobile_hint": "Pashu-Mitra मध्ये नोंदवलेला १० अंकी मोबाईल क्रमांक लिहा.",
     "farmer.otp_mobile_placeholder": "१० अंकी मोबाईल क्रमांक",
     "farmer.send_otp": "OTP पाठवा", "farmer.sending_otp": "OTP पाठवत आहे…",
     "farmer.enter_otp": "६ अंकी OTP लिहा", "farmer.otp_placeholder": "६ अंकी OTP",
@@ -460,9 +460,9 @@ const I18N = {
     "farmer.no_herd_alerts": "या कळपासाठी कोणतीही सक्रिय सूचना नाही.",
     "farmer.availability_helpline_hint": "हे सुरू राहिल्यास हेल्पलाइन {number} वर कॉल करा.",
     "farmer.change_mobile": "मोबाईल क्रमांक बदला",
-    "farmer.otp_sent": "+91 {mobile} पशुमित्रात नोंदणीकृत असल्यास OTP पाठवला आहे. तो ५ मिनिटांसाठी वैध आहे.",
+    "farmer.otp_sent": "+91 {mobile} Pashu-Mitra मध्ये नोंदणीकृत असल्यास OTP पाठवला आहे. तो ५ मिनिटांसाठी वैध आहे.",
     "farmer.otp_resent": "+91 {mobile} नोंदणीकृत असल्यास नवीन OTP पाठवला आहे. तो ५ मिनिटांसाठी वैध आहे.",
-    "farmer.otp_missing_hint": "SMS मिळाला नाही? हा क्रमांक पशुमित्रात नोंदणीकृत आहे का तपासा, फोन सुरू आणि SIM सक्रिय ठेवा, नंतर 'OTP पुन्हा पाठवा' दाबा.",
+    "farmer.otp_missing_hint": "SMS मिळाला नाही? हा क्रमांक Pashu-Mitra मध्ये नोंदणीकृत आहे का तपासा, फोन सुरू आणि SIM सक्रिय ठेवा, नंतर 'OTP पुन्हा पाठवा' दाबा.",
     "farmer.otp_invalid_mobile": "वैध १० अंकी मोबाईल क्रमांक लिहा.",
     "farmer.otp_invalid_code": "६ अंकी OTP लिहा.",
     "farmer.otp_invalid": "OTP चुकीचा आहे. तपासून पुन्हा प्रयत्न करा.",
@@ -555,7 +555,7 @@ const I18N = {
     "auth.choose": "अपना पोर्टल चुनें", "auth.newHere": "यहां नए हैं?",
     "auth.haveAccount": "पहले से पंजीकृत?", "auth.createAccount": "खाता बनाएं",
     "lang.label": "भाषा",
-    "farmer.app_name": "पशु-मित्र",
+    "farmer.app_name": "Pashu-Mitra",
     "farmer.home": "होम", "farmer.dashboard_title": "आपका पशु-आँगन",
     "farmer.welcome_back": "वापस स्वागत है,", "farmer.home_prompt": "आप क्या करना चाहते हैं?",
     "farmer.my_livestock": "मेरे पशु", "farmer.add_animal": "पशु जोड़ें", "farmer.add_herd": "झुंड जोड़ें",
@@ -655,7 +655,7 @@ const I18N = {
     "farmer.notification_auto_escalation": "जरूरी: रिपोर्ट {case} पर तुरंत ध्यान देना चाहिए।",
     "farmer.mobile_label": "मोबाइल", "farmer.email": "ईमेल", "farmer.specialization": "विशेषता",
     "farmer.current_language": "अभी की भाषा", "farmer.logout": "लॉगआउट", "farmer.user": "उपयोगकर्ता",
-    "farmer.helpline_title": "पशु के लिए मदद चाहिए?", "farmer.helpline_name": "पशु-मित्र हेल्पलाइन",
+    "farmer.helpline_title": "पशु के लिए मदद चाहिए?", "farmer.helpline_name": "Pashu-Mitra हेल्पलाइन",
     "farmer.call_now": "अभी कॉल करें", "farmer.desktop_call_note": "इस नंबर पर अपने मोबाइल से कॉल करें।",
     "farmer.not_found": "पेज नहीं मिला।", "farmer.go_home": "होम पर जाएं", "farmer.error": "कुछ गलत हुआ।",
     "farmer.offline_queued": "इंटरनेट नहीं है। अनुरोध सहेजा गया है; इंटरनेट जुड़ने पर भेजा जाएगा।",
@@ -687,7 +687,7 @@ const I18N = {
     "farmer.register_error": "जानकारी जांचकर फिर कोशिश करें।",
     // ---- OTP login (farmer) ----
     "farmer.otp_title": "मोबाइल OTP से लॉगिन", "farmer.otp_mobile_label": "पंजीकृत मोबाइल नंबर",
-    "farmer.otp_mobile_hint": "पशुमित्र में पंजीकृत 10 अंकों का मोबाइल नंबर लिखें।",
+    "farmer.otp_mobile_hint": "Pashu-Mitra में पंजीकृत 10 अंकों का मोबाइल नंबर लिखें।",
     "farmer.otp_mobile_placeholder": "10 अंकों का मोबाइल नंबर",
     "farmer.send_otp": "OTP भेजें", "farmer.sending_otp": "OTP भेजा जा रहा है…",
     "farmer.enter_otp": "6 अंकों का OTP लिखें", "farmer.otp_placeholder": "6 अंकों का OTP",
@@ -701,9 +701,9 @@ const I18N = {
     "farmer.no_herd_alerts": "इस झुंड के लिए कोई सक्रिय अलर्ट नहीं है.",
     "farmer.availability_helpline_hint": "यदि समस्या बनी रहे तो हेल्पलाइन {number} पर कॉल करें।",
     "farmer.change_mobile": "मोबाइल नंबर बदलें",
-    "farmer.otp_sent": "यदि +91 {mobile} पशुमित्र में पंजीकृत है, तो OTP भेजा गया है। यह 5 मिनट तक मान्य है।",
+    "farmer.otp_sent": "यदि +91 {mobile} Pashu-Mitra में पंजीकृत है, तो OTP भेजा गया है। यह 5 मिनट तक मान्य है।",
     "farmer.otp_resent": "यदि +91 {mobile} पंजीकृत है, तो नया OTP भेजा गया है। यह 5 मिनट तक मान्य है।",
-    "farmer.otp_missing_hint": "SMS नहीं मिला? जाँचें कि यह नंबर पशुमित्र में पंजीकृत है, फ़ोन चालू और SIM सक्रिय रखें, फिर 'OTP दोबारा भेजें' दबाएँ।",
+    "farmer.otp_missing_hint": "SMS नहीं मिला? जाँचें कि यह नंबर Pashu-Mitra में पंजीकृत है, फ़ोन चालू और SIM सक्रिय रखें, फिर 'OTP दोबारा भेजें' दबाएँ।",
     "farmer.otp_invalid_mobile": "सही 10 अंकों का मोबाइल नंबर लिखें।",
     "farmer.otp_invalid_code": "6 अंकों का OTP लिखें।",
     "farmer.otp_invalid": "OTP सही नहीं है। कृपया जांचकर फिर कोशिश करें।",
@@ -796,7 +796,7 @@ const I18N = {
     "auth.choose": "మీ పోర్టల్ ఎంచుకోండి", "auth.newHere": "కొత్తగా వచ్చారా?",
     "auth.haveAccount": "ఇప్పటికే నమోదు చేసుకున్నారా?", "auth.createAccount": "ఖాతా సృష్టించండి",
     "lang.label": "భాష",
-    "farmer.app_name": "పశు-మిత్ర",
+    "farmer.app_name": "Pashu-Mitra",
     "farmer.home": "హోమ్", "farmer.dashboard_title": "మీ పశువుల వివరాలు",
     "farmer.welcome_back": "తిరిగి స్వాగతం,", "farmer.home_prompt": "మీరు ఏమి చేయాలనుకుంటున్నారు?",
     "farmer.my_livestock": "నా పశువులు", "farmer.add_animal": "పశువును చేర్చండి", "farmer.add_herd": "మందను చేర్చండి",
@@ -896,7 +896,7 @@ const I18N = {
     "farmer.notification_auto_escalation": "అత్యవసరం: నివేదిక {case}పై వెంటనే శ్రద్ధ అవసరం.",
     "farmer.mobile_label": "మొబైల్", "farmer.email": "ఈమెయిల్", "farmer.specialization": "ప్రత్యేకత",
     "farmer.current_language": "ప్రస్తుత భాష", "farmer.logout": "లాగ్ అవుట్", "farmer.user": "వినియోగదారు",
-    "farmer.helpline_title": "జంతువుకు సహాయం కావాలా?", "farmer.helpline_name": "పశు-మిత్ర సహాయ నంబరు",
+    "farmer.helpline_title": "జంతువుకు సహాయం కావాలా?", "farmer.helpline_name": "Pashu-Mitra సహాయ నంబరు",
     "farmer.call_now": "ఇప్పుడే కాల్ చేయండి", "farmer.desktop_call_note": "ఈ నంబరుకు మీ మొబైల్ నుంచి కాల్ చేయండి.",
     "farmer.not_found": "పేజీ కనిపించలేదు.", "farmer.go_home": "హోమ్‌కు వెళ్లండి", "farmer.error": "ఏదో తప్పు జరిగింది.",
     "farmer.offline_queued": "ఇంటర్నెట్ లేదు. మీ అభ్యర్థన భద్రపరిచాం; తిరిగి కనెక్ట్ అయినప్పుడు పంపబడుతుంది.",
@@ -1502,9 +1502,11 @@ function accountActionsCard() {
 }
 function statCard(num, lbl, opts = {}) {
   const safeNum = typeof num === "number" || /^\d+(\.\d+)?$/.test(String(num)) ? String(num) : escapeHtml(num);
+  // Urgent metrics get a danger rule; the label itself still carries the meaning.
+  const urgentClass = opts.urgent ? " pm-urgent" : "";
   const trend = opts.trend ? `<span class="pm-caption" style="color:${opts.trend.startsWith('+') ? 'var(--pm-success)' : opts.trend.startsWith('-') ? 'var(--pm-danger)' : 'var(--pm-text-muted)'};font-weight:700;margin-top:2px;display:block">${escapeHtml(opts.trend)}</span>` : "";
   const sub = opts.sub ? `<span class="pm-caption" style="margin-top:2px;display:block">${escapeHtml(opts.sub)}</span>` : "";
-  return `<div class="stat-card" role="group" aria-label="${escapeAttr(lbl)}: ${escapeAttr(String(num))}"><div class="num" aria-hidden="true">${safeNum}</div><div class="lbl">${escapeHtml(lbl)}</div>${trend}${sub}</div>`;
+  return `<div class="stat-card${urgentClass}" role="group" aria-label="${escapeAttr(lbl)}: ${escapeAttr(String(num))}"><div class="num" aria-hidden="true">${safeNum}</div><div class="lbl">${escapeHtml(lbl)}</div>${trend}${sub}</div>`;
 }
 function iconItem(emoji, label, href) {
   const safeHref = String(href).startsWith("#/") ? escapeAttr(href) : "#/";
@@ -1524,7 +1526,7 @@ function header(title, opts = {}) {
   const breadcrumb = opts.breadcrumb || (window.PashuShell && window.PashuShell.breadcrumbs ? window.PashuShell.breadcrumbs(location.hash, null) : "");
   if (role === "owner") {
     return `
-      <div class="app-header owner-app-header" role="banner">
+      <div class="app-header owner-app-header">
         <div class="owner-header-top">
           ${opts.back ? `<button class="header-icon-btn" aria-label="${ft("back_to_livestock")}" onclick="history.back()">←</button>`
             : `<button class="header-icon-btn" aria-label="${ft("notifications")}" onclick="location.hash='${notifHref}'">🔔${opts.notif ? '<span class="dot"></span>' : ''}</button>`}
@@ -1540,7 +1542,7 @@ function header(title, opts = {}) {
       ${qCount > 0 ? `<div class="owner-sync" role="status" aria-live="polite"><span class="sync-indicator" role="button" tabindex="0" onclick="syncOfflineQueue()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();syncOfflineQueue()}">⚡ ${qCount} ${ft("offline_count")}</span></div>` : ""}`;
   }
   return `
-  <div class="app-header" role="banner">
+  <div class="app-header">
     ${opts.back ? `<button class="header-icon-btn" aria-label="Back" onclick="history.back()">←</button>`
       : `<button class="header-icon-btn" aria-label="Notifications" onclick="location.hash='${notifHref}'">🔔${opts.notif ? '<span class="dot"></span>' : ''}</button>`}
     <h1>${escapeHtml(title)}</h1>
@@ -1632,14 +1634,14 @@ function barChart(items) {
   const summary = `Bar chart with ${items.length} items, total ${total}. Highest: ${escapeHtml(items[0]?.label || "")} with ${items[0]?.value || 0}.`;
   const tableRows = items.map(i => `<tr><th scope="row">${escapeHtml(i.label)}</th><td>${escapeHtml(i.value)}</td></tr>`).join("");
   return `
-    <div role="img" aria-label="${escapeAttr(summary)}" class="pm-chart pm-bar-chart">
+    <div class="pm-chart pm-bar-chart">
+      <div class="pm-chart-bars" role="img" aria-label="${escapeAttr(summary)}" style="display:flex;flex-direction:column;gap:12px">
       <p class="sr-only">${escapeHtml(summary)}</p>
-      <div class="pm-chart-bars" style="display:flex;flex-direction:column;gap:12px">
       ${items.map(i => `
         <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span style="font-weight:600;color:var(--pm-text)">${escapeHtml(i.label)}</span><span style="font-weight:700;color:var(--pm-primary-dark);background:#f4f5ff;padding:2px 8px;border-radius:999px;font-size:12px">${escapeHtml(i.value)}</span></div>
-          <div style="background:#e8eaf3;border-radius:8px;height:14px;overflow:hidden;position:relative" aria-hidden="true">
-            <div style="width:${Math.max((i.value / max) * 100, 3)}%;height:100%;background:linear-gradient(90deg,var(--pm-primary-light),var(--pm-primary));border-radius:8px;transition:width 0.3s ease"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span style="font-weight:600;color:var(--pm-text)">${escapeHtml(i.label)}</span><span style="font-weight:700;color:var(--pm-primary-dark);background:var(--pm-green-100);padding:2px 8px;border-radius:999px;font-size:12px">${escapeHtml(i.value)}</span></div>
+          <div style="background:var(--pm-border-subtle);border-radius:8px;height:14px;overflow:hidden;position:relative" aria-hidden="true">
+            <div style="width:${Math.max((i.value / max) * 100, 3)}%;height:100%;background:var(--pm-chart-1);border-radius:8px;transition:width 0.3s ease"></div>
           </div>
         </div>`).join("")}
       </div>
@@ -1648,7 +1650,7 @@ function barChart(items) {
       </details>
     </div>`;
 }
-const PIE_COLORS = ["#3d4db8", "#e2483f", "#1fa971", "#e08a1e", "#8e24aa", "#2f6fed", "#6d4c41", "#f4511e"];
+const PIE_COLORS = ["var(--pm-chart-1)", "var(--pm-chart-2)", "var(--pm-chart-3)", "var(--pm-chart-4)", "var(--pm-chart-5)", "var(--pm-chart-6)"];
 function pieChart(items) {
   if (!items || !items.length) return emptyState("No data yet.");
   const total = items.reduce((s, i) => s + i.value, 0) || 1;
@@ -1665,10 +1667,10 @@ function pieChart(items) {
   const summary = `Pie chart with ${items.length} categories, total ${total}. ${items.map(i => `${i.label}: ${i.value} (${Math.round((i.value/total)*100)}%)`).join(", ")}.`;
   const tableRows = items.map(i => `<tr><th scope="row">${escapeHtml(i.label)}</th><td>${escapeHtml(i.value)}</td><td>${Math.round((i.value/total)*100)}%</td></tr>`).join("");
   return `
-    <div role="img" aria-label="${escapeAttr(summary)}" class="pm-chart pm-pie-chart">
+    <div class="pm-chart pm-pie-chart">
+      <div role="img" aria-label="${escapeAttr(summary)}" style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
       <p class="sr-only">${escapeHtml(summary)}</p>
-      <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
-        <div style="width:160px;height:160px;border-radius:50%;background:conic-gradient(${stops});flex:none;box-shadow:var(--pm-shadow-sm);border:2px solid #fff" aria-hidden="true"></div>
+        <div style="width:160px;height:160px;border-radius:50%;background:conic-gradient(${stops});flex:none;box-shadow:var(--pm-shadow-sm);border:2px solid var(--pm-surface)" aria-hidden="true"></div>
         <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:200px">${legend}</div>
       </div>
       <details class="pm-chart-details"><summary>📊 View data table (accessible alternative)</summary>
@@ -1767,10 +1769,10 @@ document.addEventListener("change", (event) => event.target?.setCustomValidity?.
 
 // ================================================================= AUTH ==
 const ROLE_META = {
-  owner: { emoji: "🧑‍🌾", label: "role.owner", color: "#1fa971" },
-  vet: { emoji: "🩺", label: "role.vet", color: "#2f6fed" },
-  govt: { emoji: "🏛️", label: "role.govt", color: "#8e24aa" },
-  lab: { emoji: "🔬", label: "role.lab", color: "#00838f" },
+  owner: { emoji: "🧑‍🌾", label: "role.owner", color: "var(--pm-primary)" },
+  vet: { emoji: "🩺", label: "role.vet", color: "var(--pm-primary)" },
+  govt: { emoji: "🏛️", label: "role.govt", color: "var(--pm-primary)" },
+  lab: { emoji: "🔬", label: "role.lab", color: "var(--pm-primary)" },
 };
 
 // ---------------------------------------------------------- brand identity --
@@ -1832,9 +1834,9 @@ function renderRoleSelect() {
         <div class="pm-helpline-details">
           <strong>National Animal Disease Emergency Helpline</strong>
           <span class="pm-helpline-num">1962 / 1800-180-1551</span>
-          <span style="font-size:12px;color:#92400E">Toll-free 24x7 livestock support in regional languages</span>
+          <span class="pm-helpline-note">Toll-free 24x7 livestock support in regional languages</span>
         </div>
-        <a href="tel:1962" class="pm-helpline-btn" aria-label="Call Helpline 1962">
+        <a href="tel:1962" class="pm-helpline-btn" aria-label="Call 1962, national animal health helpline">
           <span aria-hidden="true">📞</span> Call 1962
         </a>
       </div>
@@ -2481,10 +2483,10 @@ function renderAuth(mode, role) {
     ${role === "owner" ? `<div class="farmer-auth-language">${farmerLanguageControl()}</div>` : ""}
     <div class="auth-logo">
       ${brandLogoHtml({ className: "auth-logo-img" })}
-      <h2>Pashu-Mitra · ${t(meta.label)}</h2>
+      <h1>Pashu-Mitra · ${t(meta.label)}</h1>
       <p>${t("app.tagline")}</p>
     </div>
-    <div class="role-banner" style="background:${meta.color}1a;color:${meta.color}">
+    <div class="role-banner">
       ${meta.emoji} ${t(meta.label)} ${role === "owner" ? ft("farmer_portal") : "portal"}
     </div>
     ${isFarmerOtp ? farmerOtpLoginForm(mode) : (mode === "login" ? loginForm(role) : registerForm(role))}
@@ -2603,11 +2605,11 @@ route("#/officer-access", () => renderOfficerAccess());
 
 function renderOfficerAccess() {
   const roles = [
-    { id: "vet",  icon: "🩺", bg: "#EAF1FE", title: "Veterinarian",
+    { id: "vet",  icon: "🩺", bg: "var(--pm-green-100)", title: "Veterinarian",
       desc: "Clinical case management, prescriptions, vaccination and teleconsultation" },
-    { id: "govt", icon: "🏛️", bg: "#F3EAFB", title: "Government Officer",
+    { id: "govt", icon: "🏛️", bg: "var(--pm-green-100)", title: "Government Officer",
       desc: "State surveillance, GIS risk map, district analytics and reports" },
-    { id: "lab",  icon: "🔬", bg: "#E6F6F8", title: "Laboratory Staff",
+    { id: "lab",  icon: "🔬", bg: "var(--pm-green-100)", title: "Laboratory Staff",
       desc: "Sample receiving, diagnostic testing and pathology reports" },
   ];
   const officerT = (lang) => ({
@@ -2631,16 +2633,16 @@ function renderOfficerAccess() {
         <div class="pm-officer-saffron" aria-hidden="true"><span></span><span></span><span></span></div>
         <div class="pm-officer-head">
           <div class="pm-officer-emblem" aria-hidden="true">🏛️</div>
-          <h2>${tx.title}</h2>
+          <h1>${tx.title}</h1>
           <p>${escapeHtml(tx.kicker)} · ${escapeHtml(tx.sub)}</p>
         </div>
         <div class="pm-officer-body">
           <div class="section-title" style="text-align:center;margin:0 0 4px">${escapeHtml(tx.choose)}</div>
-          <div class="pm-officer-list" role="list">
+          <div class="pm-officer-list">
             ${roles.map(r => `
-              <button type="button" class="pm-officer-role" role="listitem"
+              <button type="button" class="pm-officer-role"
                 onclick="location.hash='#/login/${r.id}'"
-                aria-label="${escapeHtml(r.title)} — open sign-in">
+               >
                 <span class="pm-officer-icon" style="background:${r.bg}" aria-hidden="true">${r.icon}</span>
                 <span>
                   <span class="pm-officer-name">${escapeHtml(r.title)}</span>
@@ -2783,7 +2785,8 @@ async function ownerDashboard() {
   try {
     const animals = await api("/animals").catch(() => []);
     livestockCount = Array.isArray(animals) ? animals.length : 0;
-    const cases = await api("/farmer/cases").catch(() => []);
+    // /api/cases is role-scoped on the server: an owner receives only their own cases.
+    const cases = await api("/cases").catch(() => []);
     activeCases = Array.isArray(cases) ? cases.filter(c => c.status !== "Resolved" && c.status !== "Closed").length : 0;
   } catch (_) {}
   render(`
@@ -2791,29 +2794,29 @@ async function ownerDashboard() {
     <div class="hello-banner owner-hello">
       <div>${ft("welcome_back")}</div>
       <div class="owner-name">${escapeHtml(state.user.full_name)} 👋</div>
-      <div class="pm-small" style="margin-top:6px;color:rgba(255,255,255,0.9)">${ft("livestock_overview", { animals: `${livestockCount} ${ft("animals_count", { n: livestockCount })}`, cases: `${activeCases} ${ft("active_cases_count", { n: activeCases })}` })}</div>
+      <div class="pm-small" style="margin-top:6px">${ft("livestock_overview", { animals: ft("animals_count", { n: livestockCount }), cases: ft("active_cases_count", { n: activeCases }) })}</div>
     </div>
     <div class="section-card owner-home-card pm-card-elevated">
       <h2 class="pm-h2" style="margin:0 0 14px">${ft("home_prompt")}</h2>
       <div class="owner-home-actions">
-        <button class="owner-action-card" onclick="location.hash='#/owner/livestock'" aria-label="${ft("my_livestock")}">
+        <button class="owner-action-card" onclick="location.hash='#/owner/livestock'">
           <span class="action-icon" aria-hidden="true">🐄</span><span>${ft("my_livestock")}</span>
           <span class="pm-caption" style="margin-top:4px">${livestockCount} animal${livestockCount!==1?'s':''}</span>
         </button>
-        <button class="owner-action-card" onclick="location.hash='#/owner/report'" aria-label="${ft("report_problem")}" style="border-color:var(--pm-primary-light);background:#f8f9ff">
+        <button class="owner-action-card owner-action-card--primary" onclick="location.hash='#/owner/report'">
           <span class="action-icon" aria-hidden="true">📋</span><span>${ft("report_problem")}</span>
           <span class="pm-caption" style="margin-top:4px">${ft("quick_report")}</span>
         </button>
-        <button class="owner-action-card" onclick="location.hash='#/owner/prescriptions'" aria-label="${ft("health_treatment")}">
+        <button class="owner-action-card" onclick="location.hash='#/owner/prescriptions'">
           <span class="action-icon" aria-hidden="true">💊</span><span>${ft("health_treatment")}</span>
         </button>
-        <button class="owner-action-card" onclick="location.hash='#/owner/webcall'" aria-label="${ft("call_vet")}">
+        <button class="owner-action-card" onclick="location.hash='#/owner/webcall'">
           <span class="action-icon" aria-hidden="true">📞</span><span>${ft("call_vet")}</span>
         </button>
-        <button class="owner-action-card" onclick="location.hash='#/owner/notifications'" aria-label="${ft("notifications")}">
+        <button class="owner-action-card" onclick="location.hash='#/owner/notifications'">
           <span class="action-icon" aria-hidden="true">🔔</span><span>${ft("notifications")}</span>
         </button>
-        <button class="owner-action-card" onclick="location.hash='#/owner/herds'" aria-label="${ft("my_herds")}">
+        <button class="owner-action-card" onclick="location.hash='#/owner/herds'">
           <span class="action-icon" aria-hidden="true">🐑</span><span>${ft("my_herds")}</span>
         </button>
       </div>
@@ -2875,11 +2878,11 @@ async function vetDashboard() {
   const availability = availabilityRows[0] || { configured_status: "AVAILABLE", effective_status: "AVAILABLE", supported_languages: ["en"] };
   render(`
     ${header("Vet Dashboard")}
-    <div class="hello-banner"><div style="margin-top:-16px;font-size:14px;opacity:0.9">Welcome,</div><div style="font-size:19px;font-weight:800">${escapeHtml(state.user.full_name)} 🩺</div><div class="pm-small" style="margin-top:6px;color:rgba(255,255,255,0.9)">${summary.new_cases} new · ${summary.active_cases || summary.user_reports || 0} active · ${summary.lab_pending} lab pending</div></div>
-    <div class="section-card pm-card-elevated">
+    <div class="hello-banner"><div style="margin-top:-16px;font-size:14px;opacity:0.9">Welcome,</div><div style="font-size:19px;font-weight:800">${escapeHtml(state.user.full_name)} 🩺</div><div class="pm-small" style="margin-top:6px">${summary.new_cases} new · ${summary.active_cases || summary.user_reports || 0} active · ${summary.lab_pending} lab pending</div></div>
+    <div class="section-card pm-card-elevated pm-priority">
       <h2 class="pm-h2" style="margin:0 0 12px">Priority — Cases & Availability</h2>
       <div class="stat-grid" style="margin:0">
-        ${statCard(summary.new_cases, "🔴 New Cases")}
+        ${statCard(summary.new_cases, "🔴 New Cases", { urgent: true })}
         ${statCard(summary.vaccinations_due, "🟠 Vax Due")}
         ${statCard(summary.lab_pending, "🧪 Lab Pending")}
         ${statCard(summary.user_reports, "📋 Total Reports")}
@@ -2902,7 +2905,7 @@ async function vetDashboard() {
     <div class="section-card">
       <h3 class="pm-h3" style="margin:0 0 10px">📞 IVR / Helpline Status</h3>
       <div class="pm-small" style="display:flex;align-items:center;gap:8px">
-        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${ivrStatus.pstn_connected ? '#1fa971' : '#e08a1e'};flex:none" aria-hidden="true"></span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${ivrStatus.pstn_connected ? 'var(--pm-success)' : 'var(--pm-warning)'};flex:none" aria-hidden="true"></span>
         <span>Provider: <b>${escapeHtml(ivrStatus.provider_mode)}</b> · PSTN: <b>${ivrStatus.pstn_connected ? 'Connected' : 'Not Connected'}</b></span>
       </div>
       ${!ivrStatus.pstn_connected ? `<div class="pm-caption" style="margin-top:8px">${escapeHtml(ivrStatus.setup_instructions || '')}</div>` : ""}
@@ -2941,7 +2944,7 @@ async function govtDashboard() {
   const a = await api("/govt/analytics");
   render(`
     ${header("Govt Analytics")}
-    <div class="hello-banner"><div style="margin-top:-16px;font-size:14px;opacity:0.9">Maharashtra Animal Disease & Vaccine Dashboard</div><div style="font-size:19px;font-weight:800">${escapeHtml(state.user.full_name)} 🏛️</div><div class="pm-small" style="margin-top:6px;color:rgba(255,255,255,0.9)">${a.totals.cases} cases · ${a.totals.active} active · ${a.totals.animals} animals · ${a.totals.districts} districts</div></div>
+    <div class="hello-banner"><div style="margin-top:-16px;font-size:14px;opacity:0.9">Maharashtra Animal Disease & Vaccine Dashboard</div><div style="font-size:19px;font-weight:800">${escapeHtml(state.user.full_name)} 🏛️</div><div class="pm-small" style="margin-top:6px">${a.totals.cases} cases · ${a.totals.active} active · ${a.totals.animals} animals · ${a.totals.districts} districts</div></div>
     <div class="section-card pm-card-elevated">
       <h2 class="pm-h2" style="margin:0 0 14px">Key Metrics</h2>
       <div class="stat-grid" style="margin:0">
@@ -3001,7 +3004,7 @@ async function labDashboard() {
   const sum = await api("/lab/summary");
   render(`
     ${header("Laboratory Portal")}
-    <div class="hello-banner"><div style="margin-top:-16px;font-size:14px;opacity:0.9">Regional Veterinary Diagnostics</div><div style="font-size:19px;font-weight:800">${escapeHtml(state.user.full_name)} 🔬</div><div class="pm-small" style="margin-top:6px;color:rgba(255,255,255,0.9)">${sum.pending_receiving} pending · ${sum.in_testing} testing · ${sum.completed_today} released today</div></div>
+    <div class="hello-banner"><div style="margin-top:-16px;font-size:14px;opacity:0.9">Regional Veterinary Diagnostics</div><div style="font-size:19px;font-weight:800">${escapeHtml(state.user.full_name)} 🔬</div><div class="pm-small" style="margin-top:6px">${sum.pending_receiving} pending · ${sum.in_testing} testing · ${sum.completed_today} released today</div></div>
     <div class="section-card pm-card-elevated">
       <h2 class="pm-h2" style="margin:0 0 14px">Sample Queue Overview</h2>
       <div class="stat-grid" style="margin:0">
@@ -3144,9 +3147,9 @@ async function labSampleDetailView(id) {
         <div style="margin-top:10px">
           <button class="btn btn-outline" onclick="document.getElementById('rejectBox').style.display='block'">❌ Reject Specimen</button>
         </div>
-        <div id="rejectBox" style="display:none;margin-top:10px;background:#fde6e4;padding:12px;border-radius:12px">
+        <div id="rejectBox" style="display:none;margin-top:10px;background:var(--pm-danger-bg);padding:12px;border-radius:12px">
           <div class="field"><label for="rejectReasonInput">Rejection Reason</label><input id="rejectReasonInput" placeholder="e.g. Hemolyzed, broken seal, delayed transport" /></div>
-          <button class="btn btn-outline btn-sm" style="background:#fff" onclick="labReject(${safeId(s.id)})">Confirm Rejection</button>
+          <button class="btn btn-outline btn-sm" style="background:var(--pm-surface)" onclick="labReject(${safeId(s.id)})">Confirm Rejection</button>
         </div>
       ` : s.status === "LAB_RECEIVED" ? `
         <div class="meta" style="margin-bottom:12px">Specimen accepted in lab intake. Assign to testing bench:</div>
@@ -3567,7 +3570,7 @@ function initGisMap() {
   // Show warning if GIS data failed to load
   if (!gisState.outline) {
     const warning = document.createElement("div");
-    warning.style.cssText = "background:#fff3cd;padding:8px 12px;font-size:12px;border-radius:8px;margin-bottom:8px";
+    warning.style.cssText = "background:var(--pm-warning-bg);padding:8px 12px;font-size:12px;border-radius:8px;margin-bottom:8px";
     warning.innerHTML = "⚠️ Map boundary data unavailable. Using district centroids. <button class='btn btn-ghost btn-sm' onclick='location.hash=\"#/govt/gis\"'>Retry</button>";
     if (mapEl && mapEl.parentNode) mapEl.parentNode.insertBefore(warning, mapEl);
   }
@@ -3585,7 +3588,7 @@ function initGisMap() {
     if (mapEl && mapEl.parentNode) mapEl.parentNode.insertBefore(note, mapEl);
   }
   if (gisState.outline) {
-    L.geoJSON(gisState.outline, { style: { color: "#3b82f6", weight: 2, fillOpacity: 0.04, fillColor: "#3b82f6" } }).addTo(map);
+    L.geoJSON(gisState.outline, { style: { color: "#0F5757", weight: 2, fillOpacity: 0.04, fillColor: "#0F5757" } }).addTo(map);
   }
   gisState.map = map;
   gisState.layer = L.layerGroup().addTo(map);
@@ -3627,20 +3630,20 @@ function drawGis() {
     clusters.forEach(c => {
       L.circleMarker([c.lat, c.lng], {
         radius: Math.max(14, c.cases * 8),
-        color: "#8e24aa",
-        fillColor: "#e1bee7",
+        color: "#0F5757",
+        fillColor: "#A6D9D9",
         fillOpacity: 0.7,
         weight: 3,
         dashArray: "4, 4"
       }).bindTooltip(`
-        <div style="font-weight:800;color:#8e24aa">📍 Spatiotemporal Cluster: ${escapeHtml(c.cluster_id)}</div>
+        <div style="font-weight:800;color:var(--pm-primary)">📍 Spatiotemporal Cluster: ${escapeHtml(c.cluster_id)}</div>
         <div style="font-size:12px"><b>District:</b> ${escapeHtml(c.district)}</div>
         <div style="font-size:12px"><b>Cases:</b> ${escapeHtml(c.cases)} active</div>
         <div style="font-size:12px"><b>Diseases:</b> ${escapeHtml(c.diseases ? c.diseases.join(", ") : "HS")}</div>
-        <div style="font-size:11px;color:#666">Method: ${escapeHtml(c.method || "DBSCAN (haversine)")}</div>
+        <div style="font-size:11px;color:var(--pm-text-secondary)">Method: ${escapeHtml(c.method || "DBSCAN (haversine)")}</div>
       `).bindPopup(`
         <div class="pm-gis-popup">
-          <div class="pm-gis-popup-title" style="color:#8e24aa">📍 Cluster ${escapeHtml(c.cluster_id)}</div>
+          <div class="pm-gis-popup-title" style="color:var(--pm-primary)">📍 Cluster ${escapeHtml(c.cluster_id)}</div>
           <div class="pm-gis-popup-row"><b>District:</b> ${escapeHtml(c.district)}</div>
           <div class="pm-gis-popup-row"><b>Active cases:</b> ${escapeHtml(c.cases)}</div>
           <div class="pm-gis-popup-row"><b>Diseases:</b> ${escapeHtml(c.diseases ? c.diseases.join(", ") : "HS")}</div>
@@ -3669,7 +3672,7 @@ function drawGis() {
       tableHost.innerHTML = emptyState("No matching districts for the current filter.");
     } else {
       tableHost.innerHTML = `
-        <table class="pm-data-table">
+        <div class="pm-table-scroll" tabindex="0" role="region" aria-label="Disease risk by district table"><table class="pm-data-table">
           <caption class="sr-only">Disease risk by district — the same data shown on the map</caption>
           <thead><tr><th scope="col">District</th><th scope="col">Disease</th><th scope="col">Cases</th><th scope="col">Active</th><th scope="col">Mortality</th><th scope="col">Risk</th><th scope="col">Last updated</th></tr></thead>
           <tbody>
@@ -3684,7 +3687,7 @@ function drawGis() {
                 <td>${escapeHtml(d.updated_at ? fmtDate(d.updated_at) : "—")}</td>
               </tr>`).join("")}
           </tbody>
-        </table>`;
+        </table></div>`;
     }
   }
 
@@ -3741,7 +3744,7 @@ function nationalSurveillanceView() {
     render(`
       ${header("National Surveillance", { back: true })}
       ${data.reporting_scope_note ? `
-        <div style="background:#e3f2fd;padding:10px 14px;border-radius:12px;margin:12px 16px;font-size:13px">
+        <div style="background:var(--pm-green-100);padding:10px 14px;border-radius:12px;margin:12px 16px;font-size:13px">
           📋 ${data.reporting_scope_note}
         </div>
       ` : ""}
@@ -4038,7 +4041,7 @@ route("#/govt/ai", async () => {
     <div class="section-card">
       <div class="section-title">🧠 Disease Risk Prediction</div>
       <div class="meta" style="margin-bottom:10px">
-        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${modelStatus.online ? '#43a047' : '#e53935'};margin-right:6px"></span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${modelStatus.online ? 'var(--pm-success)' : 'var(--pm-danger)'};margin-right:6px"></span>
         ${modelStatus.online
           ? `AI model <b>online</b> — ${modelStatus.model}, accuracy ${Math.round(modelStatus.accuracy * 100)}% (ROC-AUC ${modelStatus.roc_auc})`
           : `⚠️ AI model <b>offline</b>. Start the ml-backend service (port 8000) to enable predictions.`}
@@ -4470,7 +4473,7 @@ function animalRecordView(role) {
         ${reproLatest && reproLatest.breeding_notes ? `<div class="small-muted" style="margin-top:6px"><b>Notes:</b> ${escapeHtml(reproLatest.breeding_notes)}</div>` : ""}
         ${canEdit ? `
           <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="document.getElementById('reproFormWrap').style.display='block'">+ Record Reproductive Event</button>
-          <div id="reproFormWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="reproFormWrap" style="display:none;margin-top:12px;background:var(--pm-surface-subtle);padding:12px;border-radius:12px">
             <form id="reproForm">
               <div class="form-row">
                 <div class="field"><label for="pm_event_type">Event</label><select id="pm_event_type" name="event_type"<option>Pregnancy Check</option><option>AI</option><option>Natural Service</option><option>Calving</option><option>Abortion</option></select></div>
@@ -4503,7 +4506,7 @@ function animalRecordView(role) {
         </div>
         ${isVet ? `
           <button class="btn btn-outline btn-sm" onclick="document.getElementById('allergyFormWrap').style.display='block'">+ Add Known Allergy</button>
-          <div id="allergyFormWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="allergyFormWrap" style="display:none;margin-top:12px;background:var(--pm-surface-subtle);padding:12px;border-radius:12px">
             <form id="allergyForm">
               <div class="form-row">
                 <div class="field"><label for="pm_allergen">Allergen Name</label><input id="pm_allergen" name="allergen" placeholder="e.g. Penicillin, NSAID, Sulfa" required /></div>
@@ -4526,7 +4529,7 @@ function animalRecordView(role) {
             <div class="stat-card"><div class="num" style="font-size:16px"><span class="badge ${riskBadgeClass(cds.risk_level)}">${cds.risk_level}</span></div><div class="lbl">Risk Classification</div></div>
             ${statCard(cds.confidence + "%", "Confidence")}
           </div>
-          <div class="demo-box" style="margin:8px 0;background:#fff8e1;border-left:4px solid #ffb300;color:#795548">
+          <div class="demo-box" style="margin:8px 0;background:var(--pm-warning-bg);border-left:4px solid var(--pm-warning);color:var(--pm-warning-text)">
             <b>⚠️ Clinical Guidance Notice:</b> ${cds.disclaimer}
           </div>
           <div style="margin-top:10px">
@@ -5006,7 +5009,7 @@ function caseDetailView(role) {
           ${isVet ? `<button class="btn btn-ghost btn-sm" onclick="document.getElementById('sampleCollectWrap').style.display='block'">+ Collect Sample</button>` : ""}
         </div>
         ${isVet ? `
-          <div id="sampleCollectWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="sampleCollectWrap" style="display:none;margin-top:12px;background:var(--pm-surface-subtle);padding:12px;border-radius:12px">
             <form id="sampleCollectForm">
               <div class="form-row">
                 <div class="field"><label for="pm_sample_type">Sample Type</label><select id="pm_sample_type" name="sample_type"<option>Blood Sample</option><option>Nasal Swab</option><option>Tissue Biopsy</option><option>Milk Sample</option><option>Fecal Sample</option></select></div>
@@ -5051,7 +5054,7 @@ function caseDetailView(role) {
           ${isVet ? `<button class="btn btn-ghost btn-sm" onclick="document.getElementById('trFormWrap').style.display='block'">+ Record Response</button>` : ""}
         </div>
         ${isVet ? `
-          <div id="trFormWrap" style="display:none;margin-top:12px;background:#f8f9fe;padding:12px;border-radius:12px">
+          <div id="trFormWrap" style="display:none;margin-top:12px;background:var(--pm-surface-subtle);padding:12px;border-radius:12px">
             <form id="trForm">
               <div class="field"><label for="pm_response">Patient Response</label>
                 <select id="pm_response" name="response"
@@ -5182,7 +5185,7 @@ window.showSampleQrModal = async function(sid) {
           <img src="${escapeHtml(s.qr_image)}" alt="Sample QR" />
         </div>
         <div class="small-muted" style="margin-bottom:8px">Token: ${escapeHtml(s.qr_token.slice(0, 16))}…</div>
-        <div style="text-align:left;max-height:140px;overflow-y:auto;border-top:1px solid #eee;padding-top:6px">
+        <div style="text-align:left;max-height:140px;overflow-y:auto;border-top:1px solid var(--pm-border-subtle);padding-top:6px">
           <b>Chain of Custody:</b>
           ${(s.custody_events || []).map(e => `<div style="font-size:11px;margin:3px 0">• <b>${escapeHtml(e.status)}:</b> ${escapeHtml(e.action)} (${escapeHtml(e.actor_name)})</div>`).join("")}
         </div>
@@ -5255,7 +5258,7 @@ function trackingCardHTML(t, c, role) {
       <div class="tag-row" style="margin-bottom:12px">
         ${stages.map(([lbl, cls]) => `<span class="badge ${cls}">${lbl}</span>`).join("")}
       </div>
-      <div id="trackMap" style="height:240px;width:100%;border-radius:14px;overflow:hidden;background:#e5e5e5"></div>
+      <div id="trackMap" style="height:240px;width:100%;border-radius:12px;overflow:hidden;background:var(--pm-surface-subtle)"></div>
       ${v ? `
         <div class="row1 tracking-meta" style="margin-top:10px;font-size:13px">
           <div><b>${localized ? ft("eta") : "ETA"}:</b> ${v.status === "ON_THE_WAY" ? `${Math.ceil(t.eta_seconds / 60)} ${localized ? ft("minutes") : "mins"}` : v.status === "ARRIVED" ? (localized ? ft("tracking_arrived") : "Arrived") : (localized ? ft("tracking_visit_done") : "Completed")}</div>
@@ -5283,8 +5286,8 @@ function initTrackMap(t, role) {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(trackMap);
   L.marker([t.destination.lat, t.destination.lng]).addTo(trackMap).bindTooltip(role === "owner" ? `📍 ${ft("location")} · ${ft("animal")}` : "📍 Animal Location");
   if (t.origin) L.marker([t.origin.lat, t.origin.lng]).addTo(trackMap).bindTooltip("Dispensary");
-  trackVet = L.circleMarker([cur.lat, cur.lng], { radius: 9, color: "#2f6fed", fillColor: "#2f6fed", fillOpacity: 0.9 }).addTo(trackMap);
-  if (t.origin && t.destination) trackLine = L.polyline([[t.origin.lat, t.origin.lng], [t.destination.lat, t.destination.lng]], { color: "#2f6fed", dashArray: "5, 8" }).addTo(trackMap);
+  trackVet = L.circleMarker([cur.lat, cur.lng], { radius: 9, color: "#0F5757", fillColor: "#0F5757", fillOpacity: 0.9 }).addTo(trackMap);
+  if (t.origin && t.destination) trackLine = L.polyline([[t.origin.lat, t.origin.lng], [t.destination.lat, t.destination.lng]], { color: "#2D8686", dashArray: "5, 8" }).addTo(trackMap);
 }
 
 function updateTrackMap(t) {
@@ -5422,7 +5425,7 @@ function bindVetCaseActions(c, allergies = []) {
               <b>${err.data.error}</b>
               <div style="margin-top:6px">Authorized Override Reason (Mandatory to override allergy warning):</div>
               <input id="overrideReasonInp" placeholder="Enter clinical justification for override" style="margin-top:4px" />
-              <button class="btn btn-outline btn-sm" style="margin-top:8px;background:#fff" type="button" id="btnConfirmOverride">Confirm Override &amp; Prescribe</button>
+              <button class="btn btn-outline btn-sm" style="margin-top:8px;background:var(--pm-surface)" type="button" id="btnConfirmOverride">Confirm Override &amp; Prescribe</button>
             </div>
           `;
           document.getElementById("btnConfirmOverride").addEventListener("click", async () => {
@@ -5748,7 +5751,7 @@ function diseaseTrendSection(diseaseTrends, trends) {
   const allDiseases = new Set();
   Object.values(diseaseTrends).forEach(arr => arr.forEach(d => allDiseases.add(d.disease)));
   const top3 = [...allDiseases].slice(0, 3);
-  const colors = ["#3f51b5", "#e53935", "#43a047"];
+  const colors = ["var(--pm-green-900)", "var(--pm-green-700)", "var(--pm-green-500)"];
   let html = `<div style="margin:8px 0">`;
   top3.forEach((disease, i) => {
     html += `<div style="margin:6px 0"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${colors[i]};margin-right:6px"></span><b>${disease}</b></div>`;
@@ -6047,7 +6050,7 @@ route("#/govt/zoonotic", async () => {
     render(`
       ${header("Zoonotic Disease Risk", { back: true })}
       ${data.active_zoonotic_cases > 0 ? `
-        <div style="background:#fde6e4;padding:12px;border-radius:12px;margin:12px 16px;border-left:4px solid #e53935">
+        <div style="background:var(--pm-danger-bg);padding:12px;border-radius:12px;margin:12px 16px;border-left:4px solid var(--pm-danger)">
           <b>⚠️ ${data.active_zoonotic_cases} active zoonotic case(s) detected!</b>
           <div class="small-muted">These diseases can transmit from animals to humans. PPE precautions required.</div>
         </div>

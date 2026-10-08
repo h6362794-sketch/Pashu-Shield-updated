@@ -5,7 +5,7 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3d4db8",
+  "theme_color": "#0F5757",
   "icons": [
     {
       "src": "assets/pashu-mitra-logo.png",

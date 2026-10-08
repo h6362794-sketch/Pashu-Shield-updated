@@ -422,13 +422,30 @@ class FrontendComplianceTest(unittest.TestCase):
         self.assertIn("opens in a new window", shell)
 
     def test_67_high_contrast_does_not_change_the_default_theme(self):
-        """Exemption 4.3 — brand colours preserved when high contrast is off."""
+        """Exemption 4.3, updated by the DBIM Green migration.
+
+        The primary brand is now the DBIM Green primary colour group, declared
+        exactly once in the token block (docs/compliance/dbim-green-redesign-audit.md
+        section 17). The retired navy/blue brand is no longer asserted here.
+        The functional status values that the compliance record preserves are
+        unchanged, and high contrast stays an opt-in class that does not alter
+        the default theme.
+        """
         css = read_frontend("style.css")
-        # The original brand palette is intact.
-        for token, value in (("--primary:#3d4db8", None), ("--primary-dark:#2c3690", None),
-                             ("--bg:#eef0f6", None), ("--green:#1fa971", None),
-                             ("--red:#e2483f", None)):
-            self.assertIn(token, css, f"brand token altered: {token}")
+        # The DBIM Green primary colour group is declared exactly once.
+        for token in ("--pm-green-900: #0F5757;", "--pm-green-700: #2D8686;",
+                      "--pm-green-500: #75BDBD;", "--pm-green-300: #A6D9D9;",
+                      "--pm-green-100: #D9F2F2;"):
+            self.assertEqual(css.count(token), 1,
+                             f"DBIM Green token missing or duplicated: {token}")
+        # The retired navy primary is not the brand any more.
+        self.assertNotIn("--pm-primary: #102A6B", css)
+        self.assertNotIn("--primary:#3d4db8", css)
+        # Functional status values are preserved (brand green is never a status colour).
+        for token in ("--pm-success: #1B5E20;", "--pm-danger: #B71C1C;",
+                      "--pm-warning: #D97706;", "--pm-info: #1565C0;",
+                      "--green:#1fa971;", "--red:#e2483f;"):
+            self.assertIn(token, css, f"functional token altered: {token}")
         # High contrast is scoped to an opt-in class only.
         self.assertIn("html.pm-high-contrast{", css)
 

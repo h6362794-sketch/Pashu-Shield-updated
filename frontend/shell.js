@@ -106,6 +106,10 @@
 
   function setLanguage(lang) {
     if (!["en", "hi", "mr", "te"].includes(lang)) return;
+    // The app owns the language state. app.js setLang() updates that state,
+    // the shell chrome, the storage keys and the page, so the global selector
+    // and the in-page farmer selector always agree.
+    if (typeof window.setLang === "function") { window.setLang(lang); return; }
     prefs.lang = lang;
     savePrefs();
     if (window.state) {
@@ -240,6 +244,8 @@
   const SHELL_I18N = {
     en: {
       identityTitle: "Animal Health & Livestock Services",
+      a11yTools: "Accessibility and language tools",
+      siteNav: "Site navigation",
       identitySub: "पशु स्वास्थ्य एवं पशुधन सेवा",
       skipToMain: "Skip to Main Content",
       textSize: "Text size",
@@ -310,6 +316,8 @@
     },
     hi: {
       identityTitle: "पशु स्वास्थ्य एवं पशुधन सेवा",
+      a11yTools: "सुलभता और भाषा उपकरण",
+      siteNav: "साइट नेविगेशन",
       identitySub: "Animal Health & Livestock Services",
       skipToMain: "मुख्य सामग्री पर जाएँ",
       textSize: "पाठ आकार",
@@ -380,6 +388,8 @@
     },
     mr: {
       identityTitle: "पशु आरोग्य व पशुधन सेवा",
+      a11yTools: "सुलभता आणि भाषा साधने",
+      siteNav: "साइट नेव्हिगेशन",
       identitySub: "Animal Health & Livestock Services",
       skipToMain: "मुख्य मजकुराकडे जा",
       textSize: "मजकूराचा आकार",
@@ -450,6 +460,8 @@
     },
     te: {
       identityTitle: "పశు ఆరోగ్య & పశుసంపద సేవలు",
+      a11yTools: "ప్రాప్యత మరియు భాషా సాధనాలు",
+      siteNav: "సైట్ నావిగేషన్",
       identitySub: "Animal Health & Livestock Services",
       skipToMain: "ముఖ్య కంటెంట్‌కు వెళ్లండి",
       textSize: "టెక్స్ట్ పరిమాణం",
@@ -636,7 +648,7 @@
     const currentLang = shellLang();
     const T = shellT;
     return '' +
-      '<div class="pm-a11y-bar" id="pmA11yBar">' +
+      '<div class="pm-a11y-bar" id="pmA11yBar" role="region" aria-label="' + escapeHtml(T("a11yTools")) + '">' +
         '<div class="pm-flag-stripe" aria-hidden="true"></div>' +
         '<div class="pm-a11y-inner">' +
           '<div class="pm-util-identity">' +
@@ -648,11 +660,11 @@
             '<div class="pm-a11y-group" role="group" aria-label="' + escapeHtml(T("textSize")) + '">' +
               '<span class="pm-a11y-label" id="pmScaleLabel">' + escapeHtml(T("textSize")) + '</span>' +
               '<button type="button" class="pm-a11y-btn" onclick="PashuShell.setScaleIndex(PashuShell.getScaleIndex()-1)" ' +
-                'aria-label="' + escapeHtml(T("decreaseText")) + '">A<span class="pm-a11y-smaller">-</span></button>' +
+                'aria-label="' + escapeHtml(T("decreaseText") + ", A-") + '">A<span class="pm-a11y-smaller">-</span></button>' +
               '<button type="button" class="pm-a11y-btn" onclick="PashuShell.setScaleIndex(1)" ' +
-                'aria-label="' + escapeHtml(T("resetText")) + '">A</button>' +
+                'aria-label="' + escapeHtml(T("resetText") + ", A") + '">A</button>' +
               '<button type="button" class="pm-a11y-btn" onclick="PashuShell.setScaleIndex(PashuShell.getScaleIndex()+1)" ' +
-                'aria-label="' + escapeHtml(T("increaseText")) + '">A<span class="pm-a11y-bigger">+</span></button>' +
+                'aria-label="' + escapeHtml(T("increaseText") + ", A+") + '">A<span class="pm-a11y-bigger">+</span></button>' +
               '<span class="pm-a11y-value" id="pmScaleValue">' + escapeHtml(T("textNormal")) + '</span>' +
             "</div>" +
 
@@ -732,7 +744,7 @@
     }).join("");
 
     return (
-      '<nav class="pm-primary-nav" id="pmPrimaryNav" aria-label="Primary Navigation">' +
+      '<nav class="pm-primary-nav" id="pmPrimaryNav" aria-label="' + escapeHtml(shellT("siteNav")) + '">' +
         '<div class="pm-nav-inner">' +
           linksHtml +
         '</div>' +
@@ -786,10 +798,10 @@
       '<header class="pm-site-header" id="site-header" role="banner">' +
         '<div class="pm-site-header-inner">' +
           '<a class="pm-brand" href="' + escapeHtml(logo.href || "#/") + '" ' +
-            'aria-label="' + escapeHtml((org.appName || "Pashu-Mitra") + " — " + shellT("goHomeAria")) + '">' +
+            'aria-label="' + escapeHtml((org.appName || "Pashu-Mitra") + " " + (shellLang() === "en" ? (org.tagline || "Animal Health & Livestock Services") : shellT("identityTitle")) + " — " + shellT("goHomeAria")) + '">' +
             logoInner +
             '<span class="pm-brand-text">' +
-              '<span class="pm-brand-name">' + escapeHtml(org.appName || "Pashu-Mitra") + "</span>" +
+              '<span class="pm-brand-name">' + escapeHtml(org.appName || "Pashu-Mitra") + "</span> " +
               '<span class="pm-brand-tag">' + escapeHtml(shellLang() === "en" ? (org.tagline || "Animal Health & Livestock Services") : shellT("identityTitle")) + "</span>" +
             "</span>" +
           "</a>" +

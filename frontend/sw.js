@@ -12,9 +12,13 @@
 
    v9 (a11y + security hardening) adds a11y.js for focus trap, dialogs,
    keyboard operable cards, form error handling, live regions, etc.
+
+   v11 (DBIM Green design system) replaces style.css. Static assets are
+   cache-first, so the cache name must change with the stylesheet or returning
+   users would keep the old colours.
    ================================================================= */
 
-const CACHE_NAME = "pashu-mitra-v10";  // bumped: vendored Leaflet for the offline GIS map
+const CACHE_NAME = "pashu-mitra-v11";  // bumped: DBIM Green design system (new stylesheet, no stale CSS)
 const STATIC_ASSETS = [
   "/",
   "/index.html",
