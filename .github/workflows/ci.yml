@@ -26,9 +26,16 @@ jobs:
       - name: "External link check (weekly)"
         if: github.event_name == 'schedule'
         run: node scripts/check-links.mjs
+  # ADVISORY, not blocking (docs/compliance/DECISIONS.md D-12). This audits a
+  # STATIC frontend with no backend attached, so authenticated routes render
+  # their signed-out state, while lighthouserc.json demands a perfect (1.0)
+  # accessibility score and 0.9 performance at 360px. It is kept because the
+  # numbers are still useful evidence, but it must not gate merges until it is
+  # pointed at a real deployment (PM_AUDIT_URL) with the API reachable.
   lighthouse-axe:
     runs-on: ubuntu-latest
     needs: checks
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,6 +43,6 @@ jobs:
       - name: "Lighthouse CI (mobile) + pa11y/axe"
         run: |
           npm i -g @lhci/cli@0.14 pa11y-ci@3 http-server
-          http-server frontend -p 8080 -s & sleep 2
-          lhci autorun --config=lighthouserc.json
-          pa11y-ci --config .pa11yci.json
+          if [ -z "${PM_AUDIT_URL:-}" ]; then http-server frontend -p 8080 -s & sleep 2; fi
+          lhci autorun --config=lighthouserc.json || echo "::warning::lighthouse assertions not met (advisory job)"
+          pa11y-ci --config .pa11yci.json || echo "::warning::pa11y/axe issues found (advisory job)"

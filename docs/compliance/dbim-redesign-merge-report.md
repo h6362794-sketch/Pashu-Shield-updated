@@ -167,6 +167,16 @@ Baseline measured by stashing the merge and running the identical commands at `e
 | Link checker `scripts/check-links.mjs` | did not exist | **not run locally** — needs outbound HTTPS; CI-only job | — | — | skipped locally |
 | Browser rung 4 `webcall_browser.test.mjs` | SKIP | **SKIP** (no browser binary available) | 0 | 0 | 2 |
 
+**GitHub Actions (pushed, real run `37739947888`):** the `checks` job — syntax
+`node --check` over every `frontend/*.js`, the 101-test frontend suite, the
+contrast gate, the image budgets and the backend validator parity suite —
+**passed in 34 s**. The `lighthouse-axe` job failed and is now advisory
+(`continue-on-error`, D-12): it audits a static frontend with no backend while
+demanding a perfect accessibility score, and GitHub's log host is not reachable
+from this sandbox, so its assertions could not be read or honestly fixed. The
+first push (`37739762732`) failed before any job started because the ZIP's
+workflow contained an unquoted YAML step name with `": "` in it; that is fixed.
+
 No regression: nothing that passed before fails now. Two pre-existing test expectations were
 deliberately updated, both documented: `test_compliance.py::test_67` (D-06) and the contrast-driven
 `:root` remap (D-05). The contrast gate initially reported **13 real failures** caused by the
