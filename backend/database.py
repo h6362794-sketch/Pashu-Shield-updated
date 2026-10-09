@@ -361,6 +361,46 @@ CREATE TABLE IF NOT EXISTS animal_medications (
     created_at TEXT DEFAULT (datetime('now'))
 );
 
+-- Farmer/vet medical history entries with an explicit event time
+-- (administered_at) distinct from the server-generated entry time (created_at).
+-- All timestamps are stored as UTC 'YYYY-MM-DD HH:MM:SS'.
+CREATE TABLE IF NOT EXISTS animal_medical_records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    animal_id INTEGER NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+    author_id INTEGER NOT NULL REFERENCES users(id),
+    author_role TEXT NOT NULL,
+    source TEXT NOT NULL CHECK(source IN ('FARMER','VET')),
+    treatment_name TEXT NOT NULL,
+    administered_at TEXT,
+    dosage TEXT,
+    administration_method TEXT,
+    reason TEXT,
+    symptoms TEXT,
+    veterinarian_name TEXT,
+    next_dose_at TEXT,
+    follow_up_at TEXT,
+    notes TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_medical_records_animal ON animal_medical_records(animal_id, administered_at);
+
+-- Photos are stored as BLOBs inside the database (outside the web root) and are
+-- only served through an authenticated, ownership-checked API endpoint.
+CREATE TABLE IF NOT EXISTS animal_medical_photos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    record_id INTEGER NOT NULL REFERENCES animal_medical_records(id) ON DELETE CASCADE,
+    animal_id INTEGER NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+    uploaded_by INTEGER NOT NULL REFERENCES users(id),
+    stored_name TEXT NOT NULL UNIQUE,
+    mime_type TEXT NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    photo_kind TEXT DEFAULT 'OTHER',
+    data BLOB NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_medical_photos_record ON animal_medical_photos(record_id);
+
 CREATE TABLE IF NOT EXISTS samples (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     sample_code TEXT UNIQUE NOT NULL,

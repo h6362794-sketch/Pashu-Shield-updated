@@ -426,7 +426,7 @@ const I18N = {
     "farmer.tracking_arrived": "पोहोचले", "farmer.tracking_visit_done": "भेट पूर्ण",
     "farmer.eta": "अंदाजे पोहोचण्याची वेळ", "farmer.minutes": "मिनिटे", "farmer.assigned": "नेमले",
     "farmer.response_improved": "बरे वाटत आहे", "farmer.response_unchanged": "फरक नाही",
-    "farmer.response_worsened": "त्रास वाढत आहे", "farmer.response_recovered": "बरे झाले",
+    "farmer.response_worsened": "त्रास वाढत आहे", "farmer.response_recovered": "बरे झाल��",
     "farmer.response_adverse_reaction": "औषधाची प्रतिक्रिया", "farmer.response_treatment_discontinued": "उपचार थांबवले",
     "farmer.response_follow_up_required": "पुढील तपासणी आवश्यक",
     "farmer.no_cases_home": "अजून कोणताही अहवाल नाही.", "farmer.error_report_animal": "अहवाल पाठवण्यापूर्वी प्राणी निवडा.",
@@ -451,7 +451,7 @@ const I18N = {
     "farmer.send_otp": "OTP पाठवा", "farmer.sending_otp": "OTP पाठवत आहे…",
     "farmer.enter_otp": "६ अंकी OTP लिहा", "farmer.otp_placeholder": "६ अंकी OTP",
     "farmer.verify_and_login": "तपासा व लॉगिन करा", "farmer.verifying_otp": "तपासत आहे…",
-    "farmer.resend_otp": "OTP पुन्हा पाठवा", "farmer.resending_otp": "पुन्हा पाठवत आहे…",
+    "farmer.resend_otp": "OTP पुन्हा पाठवा", "farmer.resending_otp": "पुन्हा पा���वत आहे…",
     "farmer.resend_in": "{seconds} सेकंदांनी पुन्हा पाठवा", "farmer.resend_ready": "OTP मिळाला नाही?",
     "farmer.livestock_overview": "तुमच्या पशुधनाचा आढावा — {animals} · {cases}", "farmer.quick_report": "झटपट तक्रार",
     "farmer.print": "प्रिंट", "farmer.print_list": "यादी प्रिंट करा", "farmer.export_csv": "CSV निर्यात करा",
@@ -565,7 +565,7 @@ const I18N = {
     "farmer.language": "भाषा", "farmer.what_to_do": "एक काम चुनें",
     // ऐप में वेब कॉल (WebRTC) — फ़ोन हेल्पलाइन से अलग.
     "farmer.call_vet": "पशु चिकित्सक को कॉल करें",
-    "farmer.call_vet_help": "इस ब्राउज़र से अभी पशु चिकित्सक से बात करें. माइक्रोफ़ोन केवल कॉल के दौरान उपयोग होता है.",
+    "farmer.call_vet_help": "इस ब्राउज़र से अभी पश��� चिकित्सक से बात करें. माइक्रोफ़ोन केवल कॉल के दौरान उपयोग होता है.",
     "farmer.call_language": "कॉल की भाषा", "farmer.call_reason": "कॉल करने का कारण",
     "farmer.call_notes": "टिप्पणी (वैकल्पिक)", "farmer.call_notes_placeholder": "लक्षण, कब से, पशु टैग…",
     "farmer.start_call": "कॉल शुरू करें", "farmer.call_history": "कॉल इतिहास",
@@ -817,7 +817,7 @@ const I18N = {
     "farmer.years": "సంవత్సరాలు", "farmer.health_status": "ఆరోగ్యం", "farmer.status": "స్థితి",
     "farmer.herd": "మంద", "farmer.herd_name": "మంద", "farmer.animal_count": "జంతువులు",
     "farmer.active_cases": "పరిష్కారం కాని ఆరోగ్య సమస్యలు", "farmer.no_active_cases": "ప్రస్తుతం ఆరోగ్య సమస్యలు లేవు",
-    "farmer.no_animals": "ఇంకా జంతువులు లేవు", "farmer.no_animals_hint": "మీ మొదటి జంతువును చేర్చితే ఇక్కడ కనిపిస్తుంది.",
+    "farmer.no_animals": "ఇంకా జంతువులు లేవు", "farmer.no_animals_hint": "మీ మొదటి జ���తువును చేర్చితే ఇక్కడ కనిపిస్తుంది.",
     "farmer.no_herds": "ఇంకా మందలు లేవు", "farmer.no_herds_hint": "మీ జంతువులను ఒకచోట ఉంచడానికి మందను చేర్చండి.",
     "farmer.loading": "లోడ్ అవుతోంది…", "farmer.loading_dashboard": "మీ హోమ్ తెరుచుకుంటోంది…",
     "farmer.loading_livestock": "మీ పశువుల వివరాలు తెరుచుకుంటున్నాయి…", "farmer.loading_animal": "జంతువు వివరాలు తెరుచుకుంటున్నాయి…",
@@ -858,7 +858,7 @@ const I18N = {
     "farmer.animal_not_found": "జంతువు కనిపించలేదు.", "farmer.herd_not_found": "మంద కనిపించలేదు.",
     "farmer.access_error": "ఈ సమాచారాన్ని చూడటానికి మీకు అనుమతి లేదు.",
     "farmer.report_title": "ఆరోగ్య సమస్యను తెలియజేయండి", "farmer.describe_symptoms": "ఏమి సమస్యో చెప్పండి",
-    "farmer.report_help": "జంతువును ఎంచుకుని మీరు గమనించిన విషయాన్ని చెప్పండి. పశువైద్యుడు సహాయం చేస్తారు.",
+    "farmer.report_help": "జంతువును ఎంచుకుని మీరు గమనించిన విష���ాన్ని చెప్పండి. పశువైద్యుడు సహాయం చేస్తారు.",
     "farmer.voice_report": "మాట్లాడి చెప్పండి", "farmer.tap_to_speak": "మాట్లాడటానికి నొక్కండి",
     "farmer.stop_recording": "రికార్డింగ్ ఆపండి", "farmer.press_mic": "మైక్రోఫోన్‌ను నొక్కి సమస్యను వివరించండి.",
     "farmer.transcribed_voice": "మాటలను రాసినది", "farmer.processing_voice": "మీ మాటలను అర్థం చేసుకుంటోంది…",
@@ -902,7 +902,7 @@ const I18N = {
     "farmer.offline_queued": "ఇంటర్నెట్ లేదు. మీ అభ్యర్థన భద్రపరిచాం; తిరిగి కనెక్ట్ అయినప్పుడు పంపబడుతుంది.",
     "farmer.delete_confirm": "జంతువు {code}ను తొలగించాలా? దాని ఆరోగ్య నివేదికలు, చికిత్స వివరాలు కూడా తొలగిపోతాయి.",
     "farmer.animal_deleted": "జంతువు {code} తొలగించబడింది.", "farmer.deceased_prompt": "జంతువు {code}ను మరణించినట్లు నమోదు చేయడానికి కారణం రాయండి:",
-    "farmer.animal_marked_deceased": "జంతువు {code} మరణించినట్లు నమోదు చేయబడింది.", "farmer.cancel": "రద్దు చేయండి",
+    "farmer.animal_marked_deceased": "జంతువు {code} మరణించినట్లు నమోదు చేయబడి��ది.", "farmer.cancel": "రద్దు చేయండి",
     "farmer.tracking_title": "పశువైద్యుని సందర్శన", "farmer.tracking_report_placed": "నివేదిక పంపబడింది",
     "farmer.tracking_vet_accepted": "పశువైద్యుడు అంగీకరించారు", "farmer.tracking_on_way": "వస్తున్నారు",
     "farmer.tracking_arrived": "చేరుకున్నారు", "farmer.tracking_visit_done": "సందర్శన పూర్తయింది",
@@ -964,7 +964,7 @@ const I18N = {
     "farmer.profile_note": "+91 {mobile} ధృవీకరించబడింది. రైతు ఖాతా సృష్టించడానికి వివరాలు నింపండి.",
     "farmer.create_account": "రైతు ఖాతా సృష్టించండి",
     "farmer.creating_account": "ఖాతా సృష్టిస్తోంది…",
-    "farmer.profile_missing": "దయచేసి పూర్తి పేరు మరియు జిల్లా నమోదు చేయండి.",
+    "farmer.profile_missing": "దయచేసి పూర్తి పేరు మరియు జిల్లా నమోదు చే���ండి.",
     "farmer.registration_expired": "ఈ ధృవీకరణ గడువు ముగిసింది. దయచేసి కొత్త OTP అభ్యర్థించండి.",
     "farmer.signup_success": "స్వాగతం, {name}! మీ రైతు ఖాతా సృష్టించబడింది.",
     "farmer.signup_link": "కొత్త రైతా? మొబైల్ OTP తో ఖాతా సృష్టించండి",
@@ -1019,6 +1019,117 @@ const I18N = {
     "farmer.push_enabled": "సూచనలు ప్రారంభించబడ్డాయి.", "farmer.push_failed": "సూచనలను ప్రారంభించలేకపోయాం. మళ్లీ ప్రయత్నించండి.",
   },
 };
+const MEDICAL_QR_I18N = {
+  en: {
+    "med.scan_qr": "Scan Animal QR", "med.scan_hint": "Point the camera at the QR tag attached to your animal.",
+    "med.start_scanner": "Start Scanner", "med.stop_scanner": "Stop Scanner", "med.camera_idle": "Camera idle.",
+    "med.camera_active": "Camera active. Hold the QR tag inside the square.", "med.camera_stopped": "Camera stopped.",
+    "med.camera_denied": "Camera permission was denied. Allow camera access or enter the Animal ID below.",
+    "med.camera_missing": "No camera was found on this device. Enter the Animal ID below.",
+    "med.camera_failed": "The camera could not be started. Enter the Animal ID below.",
+    "med.upload_qr_photo": "Upload QR Photo", "med.enter_animal_id": "Enter Animal ID", "med.lookup": "Look up",
+    "med.looking_up": "Looking up animal…", "med.invalid_qr": "Invalid QR code. This is not a Pashu-Mitra animal tag.",
+    "med.animal_not_found": "Animal not found.", "med.unauthorized": "Unauthorized access. This animal is not registered to you.",
+    "med.network_error": "Network error. Check your connection and try again.", "med.enter_id_required": "Please enter an Animal ID.",
+    "med.history": "Medication History", "med.add_record": "Add Medication Record", "med.edit_record": "Edit Record",
+    "med.treatment_name": "Medication or treatment name", "med.treatment_date": "Treatment Date", "med.record_created": "Record Created",
+    "med.updated": "Updated", "med.dosage": "Dosage", "med.method": "Administration method", "med.reason": "Reason for treatment",
+    "med.symptoms": "Symptoms or observations", "med.vet_name": "Veterinarian name", "med.next_dose": "Next dose",
+    "med.follow_up": "Follow-up", "med.notes": "Notes", "med.save": "Save Record", "med.cancel": "Cancel",
+    "med.saved": "Medication record saved.", "med.save_failed": "Could not save the record.",
+    "med.validation_error": "Please correct the highlighted fields.", "med.empty": "No medication records yet.",
+    "med.loading": "Loading medication history…", "med.upload_photo": "Upload Medical Photo", "med.photo_type": "Photo type",
+    "med.upload_success": "Photo uploaded.", "med.upload_failed": "Photo upload failed.", "med.uploading": "Uploading…",
+    "med.photo_hint": "JPEG, PNG or WebP, up to 5 MB.", "med.choose_photo": "Choose a photo first.",
+    "med.source_farmer": "Farmer-submitted", "med.source_vet": "Veterinarian-recorded", "med.by": "By",
+    "med.photo_alt": "Medical photo: {kind} for {name}", "med.close": "Close", "med.kind_PACKAGING": "Medication packaging",
+    "med.kind_PRESCRIPTION": "Prescription", "med.kind_DOCUMENT": "Treatment document", "med.kind_BILL": "Bill",
+    "med.kind_OTHER": "Other evidence", "med.method_none": "Not known", "med.vet_locked": "Recorded by a veterinarian — read only.",
+    "med.created": "Created",
+  },
+  hi: {
+    "med.scan_qr": "पशु QR स्कैन करें", "med.scan_hint": "कैमरा को पशु पर लगे QR टैग की ओर रखें।",
+    "med.start_scanner": "स्कैनर शुरू करें", "med.stop_scanner": "स्कैनर बंद करें", "med.camera_idle": "कैमरा बंद है।",
+    "med.camera_active": "कैमरा चालू है। QR टैग को चौकोर के अंदर रखें।", "med.camera_stopped": "कैमरा बंद किया गया।",
+    "med.camera_denied": "कैमरा अनुमति नहीं मिली। अनुमति दें या नीचे पशु ID दर्ज करें।",
+    "med.camera_missing": "इस डिवाइस पर कैमरा नहीं मिला। नीचे पशु ID दर्ज करें।",
+    "med.camera_failed": "कैमरा शुरू नहीं हो सका। नीचे पशु ID दर्ज करें।",
+    "med.upload_qr_photo": "QR फ़ोटो अपलोड करें", "med.enter_animal_id": "पशु ID दर्ज करें", "med.lookup": "खोजें",
+    "med.looking_up": "पशु खोजा जा रहा है…", "med.invalid_qr": "अमान्य QR कोड। यह पशु-मित्र पशु टैग नहीं है।",
+    "med.animal_not_found": "पशु नहीं मिला।", "med.unauthorized": "अनधिकृत पहुँच। यह पशु आपके नाम पर पंजीकृत नहीं है।",
+    "med.network_error": "नेटवर्क त्रुटि। कनेक्शन जाँचें और फिर प्रयास करें।", "med.enter_id_required": "कृपया पशु ID दर्ज करें।",
+    "med.history": "दवा इतिहास", "med.add_record": "दवा रिकॉर्ड जोड़ें", "med.edit_record": "रिकॉर्ड संपादित करें",
+    "med.treatment_name": "दवा या उपचार का नाम", "med.treatment_date": "उपचार की तारीख", "med.record_created": "रिकॉर्ड बनाया गया",
+    "med.updated": "अद्यतन", "med.dosage": "खुराक", "med.method": "देने का तरीका", "med.reason": "उपचार का कारण",
+    "med.symptoms": "लक्षण या अवलोकन", "med.vet_name": "पशु चिकित्सक का नाम", "med.next_dose": "अगली खुराक",
+    "med.follow_up": "फॉलो-अप", "med.notes": "टिप्पणी", "med.save": "रिकॉर्ड सहेजें", "med.cancel": "रद्द करें",
+    "med.saved": "दवा रिकॉर्ड सहेजा गया।", "med.save_failed": "रिकॉर्ड सहेजा नहीं जा सका।",
+    "med.validation_error": "कृपया चिह्नित फ़ील्ड ठीक करें।", "med.empty": "अभी कोई दवा रिकॉर्ड नहीं है।",
+    "med.loading": "दवा इतिहास लोड हो रहा है…", "med.upload_photo": "मेडिकल फ़ोटो अपलोड करें", "med.photo_type": "फ़ोटो का प्रकार",
+    "med.upload_success": "फ़ोटो अपलोड हुई।", "med.upload_failed": "फ़ोटो अपलोड विफल।", "med.uploading": "अपलोड हो रहा है…",
+    "med.photo_hint": "JPEG, PNG या WebP, अधिकतम 5 MB।", "med.choose_photo": "पहले फ़ोटो चुनें।",
+    "med.source_farmer": "किसान द्वारा दर्ज", "med.source_vet": "पशु चिकित्सक द्वारा दर्ज", "med.by": "द्वारा",
+    "med.photo_alt": "मेडिकल फ़ोटो: {name} के लिए {kind}", "med.close": "बंद करें", "med.kind_PACKAGING": "दवा का पैकेट",
+    "med.kind_PRESCRIPTION": "पर्चा", "med.kind_DOCUMENT": "उपचार दस्तावेज़", "med.kind_BILL": "बिल",
+    "med.kind_OTHER": "अन्य प्रमाण", "med.method_none": "ज्ञात नहीं", "med.vet_locked": "पशु चिकित्सक द्वारा दर्ज — केवल पढ़ने हेतु।",
+    "med.created": "बनाया गया",
+  },
+  mr: {
+    "med.scan_qr": "जनावर QR स्कॅन करा", "med.scan_hint": "कॅमेरा जनावराच्या QR टॅगकडे धरा.",
+    "med.start_scanner": "स्कॅनर सुरू करा", "med.stop_scanner": "स्कॅनर थांबवा", "med.camera_idle": "कॅमेरा बंद आहे.",
+    "med.camera_active": "कॅमेरा सुरू आहे. QR टॅग चौकोनात धरा.", "med.camera_stopped": "कॅमेरा थांबवला.",
+    "med.camera_denied": "कॅमेरा परवानगी नाकारली. परवानगी द्या किंवा खाली जनावर ID टाका.",
+    "med.camera_missing": "या उपकरणावर कॅमेरा सापडला नाही. खाली जनावर ID टाका.",
+    "med.camera_failed": "कॅमेरा सुरू होऊ शकला नाही. खाली जनावर ID टाका.",
+    "med.upload_qr_photo": "QR फोटो अपलोड करा", "med.enter_animal_id": "जनावर ID टाका", "med.lookup": "शोधा",
+    "med.looking_up": "जनावर शोधत आहे…", "med.invalid_qr": "अवैध QR कोड. हा पशु-मित्र जनावर टॅग नाही.",
+    "med.animal_not_found": "जनावर सापडले नाही.", "med.unauthorized": "अनधिकृत प्रवेश. हे जनावर तुमच्या नावावर नोंदलेले नाही.",
+    "med.network_error": "नेटवर्क त्रुटी. कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.", "med.enter_id_required": "कृपया जनावर ID टाका.",
+    "med.history": "औषध इतिहास", "med.add_record": "औषध नोंद जोडा", "med.edit_record": "नोंद संपादित करा",
+    "med.treatment_name": "औषध किंवा उपचाराचे नाव", "med.treatment_date": "उपचाराची तारीख", "med.record_created": "नोंद तयार केली",
+    "med.updated": "अद्ययावत", "med.dosage": "मात्रा", "med.method": "देण्याची पद्धत", "med.reason": "उपचाराचे कारण",
+    "med.symptoms": "लक्षणे किंवा निरीक्षणे", "med.vet_name": "पशुवैद्यकाचे नाव", "med.next_dose": "पुढील मात्रा",
+    "med.follow_up": "पाठपुरावा", "med.notes": "टीप", "med.save": "नोंद जतन करा", "med.cancel": "रद्द करा",
+    "med.saved": "औषध नोंद जतन झाली.", "med.save_failed": "नोंद जतन करता आली नाही.",
+    "med.validation_error": "कृपया चिन्हांकित फील्ड दुरुस्त करा.", "med.empty": "अद्याप औषध नोंद नाही.",
+    "med.loading": "औषध इतिहास लोड होत आहे…", "med.upload_photo": "वैद्यकीय फोटो अपलोड करा", "med.photo_type": "फोटोचा प्रकार",
+    "med.upload_success": "फोटो अपलोड झाला.", "med.upload_failed": "फोटो अपलोड अयशस्वी.", "med.uploading": "अपलोड होत आहे…",
+    "med.photo_hint": "JPEG, PNG किंवा WebP, कमाल 5 MB.", "med.choose_photo": "आधी फोटो निवडा.",
+    "med.source_farmer": "शेतकऱ्याने नोंदवले", "med.source_vet": "पशुवैद्यकाने नोंदवले", "med.by": "द्वारे",
+    "med.photo_alt": "वैद्यकीय फोटो: {name} साठी {kind}", "med.close": "बंद करा", "med.kind_PACKAGING": "औषधाचे पाकीट",
+    "med.kind_PRESCRIPTION": "प्रिस्क्रिप्शन", "med.kind_DOCUMENT": "उपचार दस्तऐवज", "med.kind_BILL": "बिल",
+    "med.kind_OTHER": "इतर पुरावा", "med.method_none": "माहीत नाही", "med.vet_locked": "पशुवैद्यकाने नोंदवलेले — फक्त वाचनासाठी.",
+    "med.created": "तयार केले",
+  },
+  te: {
+    "med.scan_qr": "పశువు QR స్కాన్ చేయండి", "med.scan_hint": "కెమెరాను పశువుకు ఉన్న QR ట్యాగ్ వైపు ఉంచండి.",
+    "med.start_scanner": "స్కానర్ ప్రారంభించండి", "med.stop_scanner": "స్కానర్ ఆపండి", "med.camera_idle": "కెమెరా ఆఫ్‌లో ఉంది.",
+    "med.camera_active": "కెమెరా ఆన్‌లో ఉంది. QR ట్యాగ్‌ను చతురస్రంలో ఉంచండి.", "med.camera_stopped": "కెమెరా ఆపబడింది.",
+    "med.camera_denied": "కెమెరా అనుమతి నిరాకరించబడింది. అనుమతి ఇవ్వండి లేదా క్రింద పశువు ID నమోదు చేయండి.",
+    "med.camera_missing": "ఈ పరికరంలో కెమెరా కనబడలేదు. క్రింద పశువు ID నమోదు చేయండి.",
+    "med.camera_failed": "కెమెరా ప్రారంభం కాలేదు. క్రింద పశువు ID నమోదు చేయండి.",
+    "med.upload_qr_photo": "QR ఫోటో అప్‌లోడ్ చేయండి", "med.enter_animal_id": "పశువు ID నమోదు చేయండి", "med.lookup": "వెతకండి",
+    "med.looking_up": "పశువును వెతుకుతోంది…", "med.invalid_qr": "చెల్లని QR కోడ్. ఇది పశు-మిత్ర పశువు ట్యాగ్ కాదు.",
+    "med.animal_not_found": "పశువు కనబడలేదు.", "med.unauthorized": "అనధికార ప్రవేశం. ఈ పశువు మీ పేరుపై నమోదు కాలేదు.",
+    "med.network_error": "నెట్‌వర్క్ లోపం. కనెక్షన్ తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.", "med.enter_id_required": "దయచేసి పశువు ID నమోదు చేయండి.",
+    "med.history": "మందుల చరిత్ర", "med.add_record": "మందు రికార్డు జోడించండి", "med.edit_record": "రికార్డు సవరించండి",
+    "med.treatment_name": "మందు లేదా చికిత్స పేరు", "med.treatment_date": "చికిత్స తేదీ", "med.record_created": "రికార్డు సృష్టించబడింది",
+    "med.updated": "నవీకరించబడింది", "med.dosage": "మోతాదు", "med.method": "ఇచ్చే విధానం", "med.reason": "చికిత్స కారణం",
+    "med.symptoms": "లక్షణాలు లేదా పరిశీలనలు", "med.vet_name": "పశువైద్యుని పేరు", "med.next_dose": "తదుపరి మోతాదు",
+    "med.follow_up": "ఫాలో-అప్", "med.notes": "గమనికలు", "med.save": "రికార్డు సేవ్ చేయండి", "med.cancel": "రద్దు చేయండి",
+    "med.saved": "మందు రికార్డు సేవ్ అయింది.", "med.save_failed": "రికార్డు సేవ్ కాలేదు.",
+    "med.validation_error": "దయచేసి గుర్తించిన ఫీల్డ్‌లను సరిచేయండి.", "med.empty": "ఇంకా మందు రికార్డులు లేవు.",
+    "med.loading": "మందుల చరిత్ర లోడ్ అవుతోంది…", "med.upload_photo": "వైద్య ఫోటో అప్‌లోడ్ చేయండి", "med.photo_type": "ఫోటో రకం",
+    "med.upload_success": "ఫోటో అప్‌లోడ్ అయింది.", "med.upload_failed": "ఫోటో అప్‌లోడ్ విఫలమైంది.", "med.uploading": "అప్‌లోడ్ అవుతోంది…",
+    "med.photo_hint": "JPEG, PNG లేదా WebP, గరిష్టం 5 MB.", "med.choose_photo": "ముందుగా ఫోటో ఎంచుకోండి.",
+    "med.source_farmer": "రైతు నమోదు చేసింది", "med.source_vet": "పశువైద్యుడు నమోదు చేసింది", "med.by": "ద్వారా",
+    "med.photo_alt": "వైద్య ఫోటో: {name} కోసం {kind}", "med.close": "మూసివేయండి", "med.kind_PACKAGING": "మందు ప్యాకెట్",
+    "med.kind_PRESCRIPTION": "ప్రిస్క్రిప్షన్", "med.kind_DOCUMENT": "చికిత్స పత్రం", "med.kind_BILL": "బిల్లు",
+    "med.kind_OTHER": "ఇతర ఆధారం", "med.method_none": "తెలియదు", "med.vet_locked": "పశువైద్యుడు నమోదు చేసింది — చదవడానికి మాత్రమే.",
+    "med.created": "సృష్టించబడింది",
+  },
+};
+for (const [lang, entries] of Object.entries(MEDICAL_QR_I18N)) Object.assign(I18N[lang], entries);
 function t(key, params = {}) {
   let value = (I18N[state.lang] && I18N[state.lang][key]) || I18N.en[key] || key;
   for (const [name, replacement] of Object.entries(params || {})) {
@@ -1399,6 +1510,29 @@ function fmtDate(d) {
   try { return new Date(d).toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" }); }
   catch (e) { return d; }
 }
+// Server timestamps are stored as naive UTC ("YYYY-MM-DD HH:MM:SS"); tag them as
+// UTC before parsing so they render in the viewer's local timezone.
+function parseServerTimestamp(d) {
+  if (!d) return null;
+  let s = String(d).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(s)) s = s.replace(" ", "T") + "Z";
+  const parsed = new Date(s);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+function fmtDateTime(d) {
+  if (!d) return "—";
+  const parsed = parseServerTimestamp(d);
+  if (!parsed) return fmtDate(d);
+  const locale = getUserRole() === "owner" ? `${state.lang}-IN` : "en-IN";
+  try {
+    return parsed.toLocaleString(locale, { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true });
+  } catch (e) { return String(d); }
+}
+function timeStamp(label, d) {
+  if (!d) return "";
+  return `<span class="small-muted record-timestamp">${escapeHtml(label)}: <time datetime="${escapeHtml(String(d))}">${escapeHtml(fmtDateTime(d))}</time></span>`;
+}
 function statusBadgeClass(status) {
   const s = (status || "").toUpperCase();
   if (["NEW", "ASSIGNED", "UNDER INVESTIGATION", "REJECTED"].includes(s)) return "badge-red";
@@ -1754,7 +1888,15 @@ async function router() {
   }
 }
 window.addEventListener("hashchange", router);
-window.addEventListener("DOMContentLoaded", router);
+// The bare site URL (no hash) opens Farmer Login for signed-out visitors. The
+// explicit Home route "#/" is left untouched so the Home nav link keeps working
+// and deep links / refreshes resolve normally.
+function applyInitialRoute() {
+  if (!state.token && (!location.hash || location.hash === "#")) {
+    history.replaceState(null, "", `${location.pathname}${location.search}#/login/owner`);
+  }
+}
+window.addEventListener("DOMContentLoaded", () => { applyInitialRoute(); router(); });
 document.addEventListener("invalid", (event) => {
   if (getUserRole() !== "owner") return;
   const field = event.target;
@@ -2922,7 +3064,6 @@ async function vetDashboard() {
         ${iconItem("📍", "Local Advisory", "#/vet/advisories")}
         ${iconItem("🚨", "Farm Alerts", "#/vet/farm-alerts")}
         ${iconItem("💊", "Prescriptions", "#/vet/prescriptions")}
-        ${iconItem("📖", "Disease Info", "#/vet/diseases")}
         ${iconItem("🔔", "Notifications", "#/vet/notifications")}
       </div>
     </div>
@@ -3693,7 +3834,7 @@ function drawGis() {
   if (topHost) topHost.innerHTML = top.length === 0 ? emptyState("No matching districts.") :
     top.map(d => `<div class="list-card" style="cursor:default">
       <div class="row1"><span class="title">${escapeHtml(d.district)}</span><span class="badge ${riskBadgeClass(d.risk_level)}">${escapeHtml(d.risk_level)}</span></div>
-      <div class="meta">${escapeHtml(d.affected_animals)} affected · ${escapeHtml(d.cases)} cases · ${escapeHtml(d.high_severity)} high-severity · ${escapeHtml(d.mortality ?? 0)} mortality</div>
+      <div class="meta">${escapeHtml(d.affected_animals)} affected �� ${escapeHtml(d.cases)} cases · ${escapeHtml(d.high_severity)} high-severity · ${escapeHtml(d.mortality ?? 0)} mortality</div>
     </div>`).join("");
 }
 
@@ -5596,7 +5737,7 @@ function ownerNotificationMessage(message) {
   }
 
   if ((match = text.match(/^An e-prescription is available for case (.+)[.]?$/i))) return ft("notification_prescription_issued", { case: match[1] });
-  if ((match = text.match(/^मामले (.+) के लिए ई-प्रिस्क्रिप्शन उपलब्ध है[।.]$/))) return ft("notification_prescription_issued", { case: match[1] });
+  if ((match = text.match(/^मामले (.+) के ��िए ई-प्रिस्क्रिप्शन उपलब्ध है[।.]$/))) return ft("notification_prescription_issued", { case: match[1] });
   if ((match = text.match(/^प्रकरण (.+) साठी ई-प्रिस्क्रिप्शन उपलब्ध आहे[।.]$/))) return ft("notification_prescription_issued", { case: match[1] });
   if ((match = text.match(/^కేసు (.+) కోసం ఇ-ప్రిస్క్రిప్షన్ అందుబాటులో ఉంది[।.]$/))) return ft("notification_prescription_issued", { case: match[1] });
 

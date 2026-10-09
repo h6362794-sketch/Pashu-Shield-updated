@@ -193,7 +193,7 @@ _NOTIFICATION_TEMPLATES = {
     },
     "prescription_issued": {
         "en": "An e-prescription is available for case {case_no}.",
-        "hi": "मामले {case_no} के लिए ई-प्रिस्क्रिप्शन उपलब्ध है।",
+        "hi": "मामल�� {case_no} के लिए ई-प्रिस्क्रिप्शन उपलब्ध है।",
         "mr": "प्रकरण {case_no} साठी ई-प्रिस्क्रिप्शन उपलब्ध आहे.",
         "te": "కేసు {case_no} కోసం ఇ-ప్రిస్క్రిప్షన్ అందుబాటులో ఉంది.",
     },
@@ -1565,7 +1565,10 @@ def get_animal_qr(animal_id):
     animal = conn.execute("SELECT * FROM animals WHERE id=?", (animal_id,)).fetchone()
     if not animal:
         conn.close()
-        return jsonify({"error": "Animal not found"}), 404
+        return jsonify({"error": "Animal not found", "code": "ANIMAL_NOT_FOUND"}), 404
+    if not _can_access_animal(animal):
+        conn.close()
+        return jsonify({"error": "Not authorized to view this animal", "code": "FORBIDDEN"}), 403
     qr = conn.execute("SELECT * FROM animal_qr_codes WHERE animal_id=? AND status='ACTIVE' ORDER BY id DESC LIMIT 1", (animal_id,)).fetchone()
     if not qr:
         token = f"aqr_{uuid.uuid4().hex}"
@@ -1588,7 +1591,9 @@ def regenerate_animal_qr(animal_id):
     try:
         animal = conn.execute("SELECT * FROM animals WHERE id=?", (animal_id,)).fetchone()
         if not animal:
-            return jsonify({"error": "Animal not found"}), 404
+            return jsonify({"error": "Animal not found", "code": "ANIMAL_NOT_FOUND"}), 404
+        if not _can_access_animal(animal):
+            return jsonify({"error": "Not authorized to manage this animal", "code": "FORBIDDEN"}), 403
 
         new_token = f"aqr_{uuid.uuid4().hex}"
         new_payload = f"PASHU:ANIMAL:{new_token}"
@@ -1622,6 +1627,13 @@ def regenerate_animal_qr(animal_id):
 @auth_required(roles=["owner", "vet", "govt"])
 def revoke_animal_qr(animal_id):
     conn = get_db()
+    animal = conn.execute("SELECT * FROM animals WHERE id=?", (animal_id,)).fetchone()
+    if not animal:
+        conn.close()
+        return jsonify({"error": "Animal not found", "code": "ANIMAL_NOT_FOUND"}), 404
+    if not _can_access_animal(animal):
+        conn.close()
+        return jsonify({"error": "Not authorized to manage this animal", "code": "FORBIDDEN"}), 403
     conn.execute("UPDATE animal_qr_codes SET status='REVOKED', revoked_at=datetime('now'), revoked_by=? WHERE animal_id=?", (g.user["uid"], animal_id))
     audit_log(conn, "REVOKE_QR", "animal", animal_id, actor_id=g.user["uid"],
               actor_name=g.user["name"], actor_role=g.user["role"])
@@ -1635,11 +1647,12 @@ def revoke_animal_qr(animal_id):
 def lookup_animal_qr():
     raw_query = (request.args.get("token") or request.args.get("code") or request.args.get("payload") or "").strip()
     if not raw_query:
-        return jsonify({"error": "Missing token or code parameter"}), 400
+        return jsonify({"error": "Missing token or code parameter", "code": "INVALID_QR"}), 400
 
-    token = raw_query
-    if token.startswith("PASHU:ANIMAL:"):
-        token = token[len("PASHU:ANIMAL:"):]
+    token = _parse_animal_qr_query(raw_query)
+    if token is None:
+        return jsonify({"error": "This is not a valid Pashu-Mitra animal QR code or animal ID.",
+                        "code": "INVALID_QR"}), 400
 
     conn = get_db()
     # Search by token or animal_code (manual fallback)
@@ -1654,12 +1667,314 @@ def lookup_animal_qr():
 
     if not qr:
         conn.close()
-        return jsonify({"error": f"No active animal record matched query: '{raw_query}'"}), 404
+        return jsonify({"error": "No animal record matches this QR code or animal ID.",
+                        "code": "ANIMAL_NOT_FOUND"}), 404
 
     animal_id = qr["id"]
+    animal_row = conn.execute("SELECT * FROM animals WHERE id=?", (animal_id,)).fetchone()
     conn.close()
+    if not _can_access_animal(animal_row):
+        return jsonify({"error": "Not authorized to view this animal", "code": "FORBIDDEN"}), 403
     # Delegate to standard get_animal for full rich record
     return get_animal(animal_id)
+
+
+_ANIMAL_QR_TOKEN_RE = __import__("re").compile(r"^aqr_[0-9a-f]{32}$")
+_ANIMAL_CODE_RE = __import__("re").compile(r"^[A-Za-z0-9][A-Za-z0-9_\-/]{0,39}$")
+
+
+def _parse_animal_qr_query(raw):
+    """Return the lookup key for a scanned QR payload / typed animal ID, or None.
+
+    Accepts ``PASHU:ANIMAL:aqr_<32 hex>`` (the payload we generate), a bare
+    ``aqr_`` token, or a plain animal code typed by the user. Anything else -
+    other PASHU payload types, URLs, free text, control characters - is
+    rejected so arbitrary scanned data never reaches the database lookup.
+    """
+    value = (raw or "").strip()
+    if not value or len(value) > 200:
+        return None
+    if value.upper().startswith("PASHU:"):
+        if not value.startswith("PASHU:ANIMAL:"):
+            return None
+        token = value[len("PASHU:ANIMAL:"):]
+        return token if _ANIMAL_QR_TOKEN_RE.match(token) else None
+    if value.startswith("aqr_"):
+        return value if _ANIMAL_QR_TOKEN_RE.match(value) else None
+    return value if _ANIMAL_CODE_RE.match(value) else None
+
+
+def _can_access_animal(animal):
+    """Farmers may only reach their own animals; staff roles keep existing access."""
+    if not animal:
+        return False
+    if g.user["role"] == "owner":
+        return animal["owner_id"] == g.user["uid"]
+    return g.user["role"] in ("vet", "govt", "lab", "admin")
+
+
+# --------------------------------------------- animal medical history ---------
+MEDICAL_PHOTO_MIME = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}
+MEDICAL_PHOTO_KINDS = {"PACKAGING", "PRESCRIPTION", "DOCUMENT", "BILL", "OTHER"}
+MEDICAL_PHOTO_MAX_PER_RECORD = 6
+MEDICAL_ADMIN_METHODS = {"", "ORAL", "INJECTION", "TOPICAL", "INTRAVENOUS", "INTRAMUSCULAR",
+                         "SUBCUTANEOUS", "INTRAMAMMARY", "OTHER"}
+_MEDICAL_TEXT_LIMITS = {
+    "treatment_name": 120, "dosage": 80, "reason": 300, "symptoms": 500,
+    "veterinarian_name": 120, "notes": 1000,
+}
+
+
+def _parse_utc_timestamp(value, field, errors, allow_future=True):
+    """Normalise an ISO-8601 timestamp to UTC 'YYYY-MM-DD HH:MM:SS' (or None)."""
+    if value in (None, ""):
+        return None
+    if not isinstance(value, str) or len(value) > 40:
+        errors[field] = "Enter a valid date and time."
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    except ValueError:
+        errors[field] = "Enter a valid date and time."
+        return None
+    if parsed.tzinfo is not None:
+        parsed = parsed.astimezone(__import__("datetime").timezone.utc).replace(tzinfo=None)
+    if parsed.year < 1990:
+        errors[field] = "Enter a valid date and time."
+        return None
+    now_utc = datetime.now(__import__("datetime").timezone.utc).replace(tzinfo=None)
+    if not allow_future and parsed > now_utc + timedelta(minutes=10):
+        errors[field] = "Treatment time cannot be in the future."
+        return None
+    return parsed.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _validate_medical_payload(data):
+    errors, clean = {}, {}
+    if not isinstance(data, dict):
+        return None, {"_": "Request body must be a JSON object."}
+    for field, limit in _MEDICAL_TEXT_LIMITS.items():
+        raw = data.get(field)
+        if raw is None:
+            clean[field] = None
+            continue
+        if not isinstance(raw, str):
+            errors[field] = "Invalid value."
+            continue
+        val = raw.strip()
+        if len(val) > limit:
+            errors[field] = f"Must be at most {limit} characters."
+        clean[field] = val or None
+    if not clean.get("treatment_name"):
+        errors["treatment_name"] = "Medication or treatment name is required."
+    method = (data.get("administration_method") or "")
+    method = method.strip().upper() if isinstance(method, str) else None
+    if method not in MEDICAL_ADMIN_METHODS:
+        errors["administration_method"] = "Choose a valid administration method."
+    clean["administration_method"] = method or None
+    clean["administered_at"] = _parse_utc_timestamp(data.get("administered_at"), "administered_at",
+                                                    errors, allow_future=False)
+    if not clean["administered_at"] and "administered_at" not in errors:
+        errors["administered_at"] = "Treatment date and time is required."
+    clean["next_dose_at"] = _parse_utc_timestamp(data.get("next_dose_at"), "next_dose_at", errors)
+    clean["follow_up_at"] = _parse_utc_timestamp(data.get("follow_up_at"), "follow_up_at", errors)
+    return clean, errors
+
+
+def _medical_record_dict(conn, row):
+    rec = row_to_dict(row)
+    photos = conn.execute(
+        "SELECT id, mime_type, size_bytes, photo_kind, created_at FROM animal_medical_photos "
+        "WHERE record_id=? ORDER BY id ASC", (row["id"],)
+    ).fetchall()
+    rec["photos"] = [dict(p, url=f"/api/medical-photos/{p['id']}") for p in photos]
+    rec["vet_verified"] = rec["source"] == "VET"
+    return rec
+
+
+def _load_accessible_animal(conn, animal_id):
+    animal = conn.execute("SELECT * FROM animals WHERE id=?", (animal_id,)).fetchone()
+    if not animal:
+        return None, (jsonify({"error": "Animal not found", "code": "ANIMAL_NOT_FOUND"}), 404)
+    if not _can_access_animal(animal):
+        return None, (jsonify({"error": "Not authorized to view this animal", "code": "FORBIDDEN"}), 403)
+    return animal, None
+
+
+@app.get("/api/animals/<int:animal_id>/medical-records")
+@auth_required()
+def list_medical_records(animal_id):
+    conn = get_db()
+    try:
+        _, err = _load_accessible_animal(conn, animal_id)
+        if err:
+            return err
+        rows = conn.execute(
+            "SELECT r.*, u.full_name author_name FROM animal_medical_records r "
+            "LEFT JOIN users u ON u.id=r.author_id WHERE r.animal_id=? "
+            "ORDER BY COALESCE(r.administered_at, r.created_at) DESC, r.id DESC", (animal_id,)
+        ).fetchall()
+        return jsonify([_medical_record_dict(conn, r) for r in rows])
+    finally:
+        conn.close()
+
+
+@app.post("/api/animals/<int:animal_id>/medical-records")
+@auth_required(roles=["owner", "vet"])
+def create_medical_record(animal_id):
+    conn = get_db()
+    try:
+        _, err = _load_accessible_animal(conn, animal_id)
+        if err:
+            return err
+        clean, errors = _validate_medical_payload(request.get_json(silent=True))
+        if errors:
+            return jsonify({"error": "Please correct the highlighted fields.", "code": "VALIDATION_ERROR",
+                            "fields": errors}), 400
+        source = "VET" if g.user["role"] == "vet" else "FARMER"
+        cur = conn.execute(
+            "INSERT INTO animal_medical_records (animal_id, author_id, author_role, source, treatment_name, "
+            "administered_at, dosage, administration_method, reason, symptoms, veterinarian_name, next_dose_at, "
+            "follow_up_at, notes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (animal_id, g.user["uid"], g.user["role"], source, clean["treatment_name"], clean["administered_at"],
+             clean["dosage"], clean["administration_method"], clean["reason"], clean["symptoms"],
+             clean["veterinarian_name"], clean["next_dose_at"], clean["follow_up_at"], clean["notes"])
+        )
+        audit_log(conn, "CREATE_MEDICAL_RECORD", "animal", animal_id, actor_id=g.user["uid"],
+                  actor_name=g.user["name"], actor_role=g.user["role"],
+                  details={"record_id": cur.lastrowid, "source": source})
+        conn.commit()
+        row = conn.execute(
+            "SELECT r.*, u.full_name author_name FROM animal_medical_records r "
+            "LEFT JOIN users u ON u.id=r.author_id WHERE r.id=?", (cur.lastrowid,)
+        ).fetchone()
+        return jsonify(_medical_record_dict(conn, row)), 201
+    finally:
+        conn.close()
+
+
+def _load_editable_record(conn, animal_id, record_id):
+    _, err = _load_accessible_animal(conn, animal_id)
+    if err:
+        return None, err
+    rec = conn.execute("SELECT * FROM animal_medical_records WHERE id=? AND animal_id=?",
+                       (record_id, animal_id)).fetchone()
+    if not rec:
+        return None, (jsonify({"error": "Medical record not found", "code": "RECORD_NOT_FOUND"}), 404)
+    if rec["author_id"] != g.user["uid"]:
+        message = ("Veterinarian-recorded entries cannot be changed by farmers."
+                   if rec["source"] == "VET" else "Only the author can change this record.")
+        return None, (jsonify({"error": message, "code": "FORBIDDEN"}), 403)
+    return rec, None
+
+
+@app.put("/api/animals/<int:animal_id>/medical-records/<int:record_id>")
+@auth_required(roles=["owner", "vet"])
+def update_medical_record(animal_id, record_id):
+    conn = get_db()
+    try:
+        _, err = _load_editable_record(conn, animal_id, record_id)
+        if err:
+            return err
+        clean, errors = _validate_medical_payload(request.get_json(silent=True))
+        if errors:
+            return jsonify({"error": "Please correct the highlighted fields.", "code": "VALIDATION_ERROR",
+                            "fields": errors}), 400
+        conn.execute(
+            "UPDATE animal_medical_records SET treatment_name=?, administered_at=?, dosage=?, "
+            "administration_method=?, reason=?, symptoms=?, veterinarian_name=?, next_dose_at=?, "
+            "follow_up_at=?, notes=?, updated_at=datetime('now') WHERE id=?",
+            (clean["treatment_name"], clean["administered_at"], clean["dosage"], clean["administration_method"],
+             clean["reason"], clean["symptoms"], clean["veterinarian_name"], clean["next_dose_at"],
+             clean["follow_up_at"], clean["notes"], record_id)
+        )
+        audit_log(conn, "UPDATE_MEDICAL_RECORD", "animal", animal_id, actor_id=g.user["uid"],
+                  actor_name=g.user["name"], actor_role=g.user["role"], details={"record_id": record_id})
+        conn.commit()
+        row = conn.execute(
+            "SELECT r.*, u.full_name author_name FROM animal_medical_records r "
+            "LEFT JOIN users u ON u.id=r.author_id WHERE r.id=?", (record_id,)
+        ).fetchone()
+        return jsonify(_medical_record_dict(conn, row))
+    finally:
+        conn.close()
+
+
+@app.post("/api/animals/<int:animal_id>/medical-records/<int:record_id>/photos")
+@auth_required(roles=["owner", "vet"])
+def upload_medical_photo(animal_id, record_id):
+    import compliance_security as cs
+    conn = get_db()
+    try:
+        _, err = _load_editable_record(conn, animal_id, record_id)
+        if err:
+            return err
+        storage = request.files.get("photo")
+        if storage is None or not storage.filename:
+            return jsonify({"error": "Choose a photo to upload.", "code": "VALIDATION_ERROR"}), 400
+        ok, reason = cs.validate_upload(storage, storage.filename, storage.mimetype)
+        if not ok:
+            return jsonify({"error": reason, "code": "INVALID_FILE"}), 400
+        data = storage.stream.read()
+        header = data[:12]
+        if header.startswith(b"\xff\xd8\xff"):
+            mime = "image/jpeg"
+        elif header.startswith(b"\x89PNG\r\n\x1a\n"):
+            mime = "image/png"
+        elif header.startswith(b"RIFF") and header[8:12] == b"WEBP":
+            mime = "image/webp"
+        else:
+            return jsonify({"error": "Only JPEG, PNG or WebP photos are accepted.", "code": "INVALID_FILE"}), 400
+        try:
+            with Image.open(io.BytesIO(data)) as img:
+                img.verify()
+        except Exception:
+            return jsonify({"error": "The photo could not be read. Please upload a valid image.",
+                            "code": "INVALID_FILE"}), 400
+        count = conn.execute("SELECT COUNT(*) FROM animal_medical_photos WHERE record_id=?",
+                             (record_id,)).fetchone()[0]
+        if count >= MEDICAL_PHOTO_MAX_PER_RECORD:
+            return jsonify({"error": f"A record can hold at most {MEDICAL_PHOTO_MAX_PER_RECORD} photos.",
+                            "code": "LIMIT_REACHED"}), 400
+        kind = (request.form.get("photo_kind") or "OTHER").strip().upper()
+        if kind not in MEDICAL_PHOTO_KINDS:
+            kind = "OTHER"
+        stored_name = f"med_{uuid.uuid4().hex}.{MEDICAL_PHOTO_MIME[mime]}"
+        cur = conn.execute(
+            "INSERT INTO animal_medical_photos (record_id, animal_id, uploaded_by, stored_name, mime_type, "
+            "size_bytes, photo_kind, data) VALUES (?,?,?,?,?,?,?,?)",
+            (record_id, animal_id, g.user["uid"], stored_name, mime, len(data), kind, sqlite3.Binary(data))
+        )
+        conn.execute("UPDATE animal_medical_records SET updated_at=datetime('now') WHERE id=?", (record_id,))
+        audit_log(conn, "UPLOAD_MEDICAL_PHOTO", "animal", animal_id, actor_id=g.user["uid"],
+                  actor_name=g.user["name"], actor_role=g.user["role"],
+                  details={"record_id": record_id, "photo_id": cur.lastrowid, "size": len(data)})
+        conn.commit()
+        photo = conn.execute("SELECT id, mime_type, size_bytes, photo_kind, created_at FROM animal_medical_photos "
+                             "WHERE id=?", (cur.lastrowid,)).fetchone()
+        return jsonify(dict(photo, url=f"/api/medical-photos/{photo['id']}")), 201
+    finally:
+        conn.close()
+
+
+@app.get("/api/medical-photos/<int:photo_id>")
+@auth_required()
+def get_medical_photo(photo_id):
+    conn = get_db()
+    try:
+        photo = conn.execute("SELECT * FROM animal_medical_photos WHERE id=?", (photo_id,)).fetchone()
+        if not photo:
+            return jsonify({"error": "Photo not found", "code": "NOT_FOUND"}), 404
+        _, err = _load_accessible_animal(conn, photo["animal_id"])
+        if err:
+            return err
+        resp = Response(bytes(photo["data"]), mimetype=photo["mime_type"])
+        resp.headers["Cache-Control"] = "private, no-store"
+        resp.headers["X-Content-Type-Options"] = "nosniff"
+        resp.headers["Content-Disposition"] = f'inline; filename="{photo["stored_name"]}"'
+        return resp
+    finally:
+        conn.close()
 
 
 @app.post("/api/qr/decode")
@@ -1742,6 +2057,10 @@ def decode_qr():
 @auth_required()
 def get_reproductive_records(animal_id):
     conn = get_db()
+    _, err = _load_accessible_animal(conn, animal_id)
+    if err:
+        conn.close()
+        return err
     records = conn.execute(
         "SELECT r.*, u.full_name recorded_by_name FROM animal_reproductive_records r LEFT JOIN users u ON u.id=r.recorded_by "
         "WHERE animal_id=? ORDER BY id DESC", (animal_id,)
@@ -1794,6 +2113,10 @@ def add_reproductive_record(animal_id):
 @auth_required()
 def get_animal_allergies(animal_id):
     conn = get_db()
+    _, err = _load_accessible_animal(conn, animal_id)
+    if err:
+        conn.close()
+        return err
     rows = conn.execute(
         "SELECT a.*, u.full_name recorded_by_name FROM animal_allergies a LEFT JOIN users u ON u.id=a.recorded_by "
         "WHERE animal_id=? ORDER BY id DESC", (animal_id,)
@@ -1832,6 +2155,10 @@ def add_animal_allergy(animal_id):
 @auth_required()
 def get_animal_medications(animal_id):
     conn = get_db()
+    _, err = _load_accessible_animal(conn, animal_id)
+    if err:
+        conn.close()
+        return err
     rows = conn.execute(
         "SELECT m.*, u.full_name prescribed_by_name FROM animal_medications m LEFT JOIN users u ON u.id=m.prescribed_by "
         "WHERE animal_id=? ORDER BY id DESC", (animal_id,)
