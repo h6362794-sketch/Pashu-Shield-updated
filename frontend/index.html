@@ -63,6 +63,12 @@
 
   <!-- Accessibility helpers: focus trap, dialogs, cards, forms, live regions -->
   <script src="a11y.js"></script>
+  <!-- Welcome video popup (additive): shows the Pashu-Mitra introduction video
+       in a centred, dismissible dialog. Loaded after a11y.js because it reuses
+       the existing focus-trap/dialog helpers when they are available. It is
+       appended to <body> at runtime, so the skip link above stays the first
+       focusable element in the document. -->
+  <script src="welcome-video.js"></script>
   <!-- CAPTCHA hook: env-driven, accessible alternative, no secrets -->
   <script src="captcha.js"></script>
   <script src="app.js"></script>
