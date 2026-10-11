@@ -100,6 +100,11 @@ def _csp_directives() -> str:
         "font-src 'self' data:; "
         "media-src 'self' blob: mediastream:; "
         "worker-src 'self' blob:; "
+        # frame-src: the only third-party frame the application embeds is the
+        # privacy-enhanced YouTube welcome video (frontend/welcome-video.js).
+        # Without this directive it would fall back to default-src 'self' and
+        # be blocked the moment an operator enables SIH_CSP_ENFORCE=1.
+        "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com; "
         "frame-ancestors 'self'; "
         "base-uri 'self'; "
         "form-action 'self'; "

@@ -114,6 +114,19 @@ class SecurityHeadersTest(unittest.TestCase):
         self.assertIn("connect-src", policy)
         self.assertIn("report-uri", policy)
 
+    def test_04b_csp_allows_the_embedded_welcome_video_frame(self):
+        """The YouTube welcome video is the only third-party frame in the app.
+
+        Without an explicit frame-src entry the player would fall back to
+        default-src 'self' and break as soon as an operator sets
+        SIH_CSP_ENFORCE=1 (frontend/welcome-video.js).
+        """
+        policy = self.client.get("/api/health").headers["Content-Security-Policy-Report-Only"]
+        self.assertIn("frame-src", policy)
+        self.assertIn("https://www.youtube-nocookie.com", policy)
+        # The rest of the policy is unchanged.
+        self.assertIn("frame-ancestors 'self'", policy)
+
     def test_05_server_header_is_not_advertised(self):
         r = self.client.get("/api/health")
         self.assertNotIn("Server", r.headers)

@@ -2229,3 +2229,135 @@ html.pm-reduced-motion *, html.pm-reduced-motion *::before, html.pm-reduced-moti
   .owner-livestock-action-grid .btn { width: 100%; }
 }
 
+
+/* ---------- welcome video popup (additive; existing modal + design tokens) ----------
+   A viewport-level backdrop with a centred 16:9 YouTube player. Only existing
+   tokens are used (navy primary, 6px radius, existing shadow) so the popup
+   reads as part of the same government-portal interface - no new theme. */
+.pm-welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200; /* above header (100), bottom nav (900) and other modals (1000) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+  background: rgba(11, 30, 72, 0.72);
+}
+.pm-welcome-dialog {
+  width: 100%;
+  max-width: 880px;      /* desktop: comfortably large, still 16:9 */
+  max-width: min(880px, 100%);
+  padding: 16px;
+  margin: auto;          /* keeps the dialog centred when it must scroll */
+}
+.pm-welcome-dialog:focus {
+  outline: 3px solid var(--pm-focus, #102a6b);
+  outline-offset: 2px;
+}
+.pm-welcome-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.pm-welcome-title {
+  margin: 0;
+  font-size: calc(var(--pm-text-xl, 20px) * var(--pm-text-scale, 1));
+  font-weight: 800;
+  color: var(--pm-primary-dark, #0b1e48);
+  line-height: 1.3;
+}
+.pm-welcome-close {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--pm-border, #cbd5e1);
+  border-radius: var(--pm-radius-sm, 4px);
+  background: var(--pm-surface-alt, #f8fafc);
+  color: var(--pm-primary-dark, #0b1e48);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.pm-welcome-close:hover {
+  background: #e2e8f0;
+}
+.pm-welcome-close:focus-visible,
+.pm-welcome-watch:focus-visible,
+.pm-welcome-close-text:focus-visible {
+  outline: 3px solid var(--pm-focus, #102a6b);
+  outline-offset: 2px;
+}
+.pm-welcome-note {
+  margin: 0 0 12px;
+  font-size: calc(var(--pm-text-sm, 13px) * var(--pm-text-scale, 1));
+  color: var(--pm-text-muted, #475569);
+}
+/* Responsive 16:9 player box: the iframe fills it absolutely. */
+.pm-welcome-video-frame {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000000;
+  border: 1px solid var(--pm-border, #cbd5e1);
+  border-radius: var(--pm-radius-md, 6px);
+  overflow: hidden;
+}
+/* Fallback for browsers without aspect-ratio support (padding-top ratio box). */
+@supports not (aspect-ratio: 16 / 9) {
+  .pm-welcome-video-frame::before {
+    content: "";
+    display: block;
+    padding-top: 56.25%;
+  }
+}
+.pm-welcome-video-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.pm-welcome-fallback {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  background: var(--pm-warning-bg, #fffbeb);
+  border: 1px solid var(--pm-warning-border, #fde68a);
+  border-radius: var(--pm-radius-sm, 4px);
+  color: var(--pm-text, #0f172a);
+  font-size: calc(var(--pm-text-sm, 13px) * var(--pm-text-scale, 1));
+}
+.pm-welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+.pm-welcome-actions .btn {
+  flex: 1 1 auto;
+  justify-content: center;
+  text-decoration: none;
+}
+@media (max-width: 640px) {
+  .pm-welcome-overlay {
+    padding: 12px;
+  }
+  /* The dialog stays centred; margin:auto keeps the overflow scrollable when
+     the viewport is shorter than the player (no clipped close button). */
+  .pm-welcome-dialog {
+    padding: 14px;
+    max-width: 100%;
+    margin: auto;
+  }
+  .pm-welcome-actions .btn {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+}

@@ -12,15 +12,20 @@
 
    v9 (a11y + security hardening) adds a11y.js for focus trap, dialogs,
    keyboard operable cards, form error handling, live regions, etc.
+
+   v11 adds the welcome-video popup (welcome-video.js, video id QJILXRbxcts).
+   The fetch strategy is unchanged: the new script is pre-cached with the rest
+   of the shell, and the YouTube player itself is third-party (never cached).
    ================================================================= */
 
-const CACHE_NAME = "pashu-mitra-v10";  // bumped: vendored Leaflet for the offline GIS map
+const CACHE_NAME = "pashu-mitra-v11";  // bumped: welcome-video.js (YouTube welcome popup)
 const STATIC_ASSETS = [
   "/",
   "/index.html",
   "/style.css",
   "/app.js",
   "/a11y.js",
+  "/welcome-video.js",
   "/org-config.js",
   "/shell.js",
   "/info-pages.js",
